@@ -1,0 +1,64 @@
+export interface Review {
+  id: string;
+  writer: string;
+  rating: number;
+  date: string;
+  text: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice: number;
+  description: string;
+  longDescription: string;
+  image: string;
+  images?: string[];
+  rating: number;
+  reviewsCount: number;
+  category: string;
+  features: string[];
+  variants?: string[];
+  sizes?: string[];
+  variantImages?: Record<string, string>;
+  stock: number;
+  badge?: string;
+}
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+  selectedColor?: string;
+  selectedSize?: string;
+}
+
+export interface Order {
+  id: string;
+  customerDetails: {
+    name: string;
+    phone: string;
+    whatsapp: string;
+    address: string;
+    city: string;
+    notes?: string;
+  };
+  items: CartItem[];
+  totalAmount: number;
+  shippingCost: number;
+  date: string;
+  status: 'Pending' | 'Shipped' | 'Delivered' | 'Cancelled';
+  paymentMethod: string;
+}
+
+export interface BannerSlide {
+  id: string;
+  title: string;
+  subtitle: string;
+  priceText: string;
+  badge: string;
+  tagline: string;
+  image: string;
+  linkCategory: string;
+  bgColor?: string;
+}
