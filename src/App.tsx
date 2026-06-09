@@ -284,12 +284,13 @@ export default function App() {
           // Scroll smoothly to products grid
           document.getElementById('product-catalog-grid')?.scrollIntoView({ behavior: 'smooth' });
         }}
-      />      {/* 2. Hero Slideshow banner */}
-      <section className="relative overflow-hidden bg-brand-charcoal py-4 sm:py-8 text-white">
-        <div className="absolute inset-0 bg-radial-gradient from-zinc-800/20 via-transparent to-transparent opacity-90 pointer-events-none" />
+      />
+      {/* 2. Hero Slideshow banner (Full Width Edge-to-Edge) */}
+      <section className="relative overflow-hidden bg-brand-charcoal w-full text-white">
+        <div className="absolute inset-0 bg-radial-gradient from-zinc-805/10 via-transparent to-transparent opacity-85 pointer-events-none" />
 
         {slides.length > 0 && slides[currentSlideIdx] ? (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="w-full relative z-10">
             {/* Full Width Image Slide element */}
             <div 
               onClick={() => {
@@ -298,50 +299,92 @@ export default function App() {
                   document.getElementById('product-catalog-grid')?.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="relative group aspect-[1.8/1] sm:aspect-[2.8/1] w-full rounded-2xl overflow-hidden shadow-2xl border-4 border-white/10 bg-zinc-800 cursor-pointer"
+              className="relative group aspect-[2.1/1] sm:aspect-[2.8/1] md:aspect-[3.1/1] xl:aspect-[3.4/1] w-full overflow-hidden bg-zinc-900 cursor-pointer"
             >
               <img 
                 src={slides[currentSlideIdx].image} 
                 alt={slides[currentSlideIdx].title || "Banner Slide"} 
-                className="h-full w-full object-cover transform scale-100 hover:scale-[1.02] transition-transform duration-700"
+                className="h-full w-full object-cover transform scale-100 hover:scale-[1.015] transition-transform duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+              
+              {/* Premium dark shading on left part to assist typography visibility if any */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent pointer-events-none" />
 
-              {/* Slider triggers inside the overlay */}
+              {/* Dynamic Overlay Text & CTA Button if slide is configured with information */}
+              {(slides[currentSlideIdx].title || slides[currentSlideIdx].subtitle) && (
+                <div className="absolute inset-0 flex items-center justify-start p-6 sm:p-12 md:p-16 text-left select-none">
+                  <div className="max-w-xs sm:max-w-lg md:max-w-xl space-y-1.5 sm:space-y-3.5 z-20 animate-fade-in">
+                    {slides[currentSlideIdx].badge && (
+                      <span className="inline-block bg-brand-gold text-brand-black text-[9px] sm:text-[11px] font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-wider shadow-md">
+                        {slides[currentSlideIdx].badge}
+                      </span>
+                    )}
+                    <h1 className="font-display text-base sm:text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight drop-shadow-md">
+                      {slides[currentSlideIdx].title}
+                    </h1>
+                    <p className="text-zinc-200 text-xs sm:text-base md:text-lg font-bold drop-shadow-sm font-sans">
+                      {slides[currentSlideIdx].subtitle}
+                    </p>
+                    {slides[currentSlideIdx].priceText && (
+                      <div className="text-brand-gold text-xs sm:text-sm md:text-lg font-black font-mono tracking-wide">
+                        {slides[currentSlideIdx].priceText}
+                      </div>
+                    )}
+                    
+                    <div className="pt-1 sm:pt-3">
+                      <span className="inline-flex items-center gap-1.5 bg-white text-brand-black hover:bg-brand-gold hover:text-brand-black font-black text-[8px] sm:text-[10px] md:text-xs px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl uppercase tracking-wider transition-all duration-300 shadow-lg">
+                        <span>Shop Now</span>
+                        <ShoppingBag className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Slider Absolute Edge Actions - Left Chevron */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentSlideIdx((prev) => (prev - 1 + slides.length) % slides.length);
+                }}
+                className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-25 h-8 w-8 sm:h-12 sm:w-12 rounded-full bg-white/90 hover:bg-white text-brand-black flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 md:opacity-0 group-hover:opacity-100 cursor-pointer"
+                title="Previous Banner"
+              >
+                <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
+              </button>
+
+              {/* Slider Absolute Edge Actions - Right Chevron */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentSlideIdx((prev) => (prev + 1) % slides.length);
+                }}
+                className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-25 h-8 w-8 sm:h-12 sm:w-12 rounded-full bg-white/90 hover:bg-white text-brand-black flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 md:opacity-0 group-hover:opacity-100 cursor-pointer"
+                title="Next Banner"
+              >
+                <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
+              </button>
+
+              {/* Dynamic Bottom Indicators dots overlay */}
               <div 
-                className="absolute bottom-4 left-4 right-4 flex justify-between items-center bg-brand-charcoal/85 backdrop-blur-xs rounded-xl p-2 sm:p-2.5 border border-white/10"
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 z-25 flex items-center gap-1.5 bg-black/40 backdrop-blur-xs px-3 py-1.5 rounded-full border border-white/5"
                 onClick={(e) => e.stopPropagation()}
               >
-                <button 
-                  onClick={() => setCurrentSlideIdx((prev) => (prev - 1 + slides.length) % slides.length)}
-                  className="p-1.5 rounded-lg bg-white/10 hover:bg-white text-white hover:text-brand-black transition-all cursor-pointer"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                
-                <div className="flex gap-1.5">
-                  {slides.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentSlideIdx(idx)}
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        currentSlideIdx === idx ? 'w-6 bg-brand-gold' : 'w-2 bg-white/30'
-                      }`}
-                    />
-                  ))}
-                </div>
-
-                <button 
-                  onClick={() => setCurrentSlideIdx((prev) => (prev + 1) % slides.length)}
-                  className="p-1.5 rounded-lg bg-white/10 hover:bg-white text-white hover:text-brand-black transition-all cursor-pointer"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
+                {slides.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentSlideIdx(idx)}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      currentSlideIdx === idx ? 'w-5 bg-brand-gold' : 'w-1.5 bg-white/45 hover:bg-white'
+                    }`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
               </div>
             </div>
           </div>
         ) : (
-          <div className="text-center py-24">
+          <div className="text-center py-24 bg-zinc-950">
             <p className="text-zinc-400 font-mono text-xs">No Slider Banners Active. Configure some inside the Admin portal.</p>
           </div>
         )}
