@@ -37,6 +37,84 @@ const PRESET_IMAGES = [
   { name: 'Gadget - Motion Sensor Automatic Closet LED Strip', url: 'https://images.unsplash.com/photo-1565814636199-ae8133055c1c?auto=format&fit=crop&q=80&w=600' }
 ];
 
+/**
+ * Compresses an image file (or base64 string) using HTML Canvas
+ * to prevent localStorage QuotaExceededError. Real photos can be 5MB+,
+ * but drawing and exporting as JPEG 0.7 quality reduces size to <100KB.
+ */
+function compressImage(
+  fileOrDataUrl: File | string,
+  maxWidth = 800,
+  maxHeight = 800,
+  quality = 0.7
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    const processSrc = (src: string) => {
+      // If it's not a base64 DataURL or if it is already small, skip compression
+      if (typeof src === 'string' && !src.startsWith('data:image/')) {
+        resolve(src);
+        return;
+      }
+      
+      const img = document.createElement('img');
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        // Calculate aspect-ratio restricted dimensions
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(src); // Fallback
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Export as compressed jpeg standard base64 url
+        const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
+        resolve(compressedBase64);
+      };
+      img.onerror = () => {
+        resolve(src); // Fallback if image load fails
+      };
+      img.src = src;
+    };
+
+    if (fileOrDataUrl instanceof File) {
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          processSrc(e.target.result as string);
+        } else {
+          reject(new Error("File reader failed"));
+        }
+      };
+      reader.onerror = () => reject(new Error("File reader error"));
+      reader.readAsDataURL(fileOrDataUrl);
+    } else {
+      processSrc(fileOrDataUrl);
+    }
+  });
+}
+
 export default function ProductManagerModal({ products, onClose, onSaveProducts, slides, onSaveSlides }: ProductManagerModalProps) {
   // Authentication states
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
@@ -1720,16 +1798,24 @@ CREATE TABLE IF NOT EXISTS orders (
                                   onChange={(e: any) => {
                                     const file = e.target.files?.[0];
                                     if (!file) return;
-                                    const reader = new FileReader();
-                                    reader.onload = (event) => {
-                                      if (event.target?.result) {
-                                        setFormVariantImages(prev => ({
-                                          ...prev,
-                                          [val]: event.target!.result as string
-                                        }));
-                                      }
-                                    };
-                                    reader.readAsDataURL(file);
+                                    compressImage(file).then((compressed) => {
+                                      setFormVariantImages(prev => ({
+                                        ...prev,
+                                        [val]: compressed
+                                      }));
+                                    }).catch((err) => {
+                                      console.error("Compression error:", err);
+                                      const reader = new FileReader();
+                                      reader.onload = (event) => {
+                                        if (event.target?.result) {
+                                          setFormVariantImages(prev => ({
+                                            ...prev,
+                                            [val]: event.target!.result as string
+                                          }));
+                                        }
+                                      };
+                                      reader.readAsDataURL(file);
+                                    });
                                   }}
                                 />
                               </div>
@@ -1789,14 +1875,18 @@ CREATE TABLE IF NOT EXISTS orders (
                           const file = e.target.files?.[0];
                           if (!file) return;
                           
-                          // Convert to base64
-                          const reader = new FileReader();
-                          reader.onload = (event) => {
-                            if (event.target?.result) {
-                              setFormImage(event.target.result as string);
-                            }
-                          };
-                          reader.readAsDataURL(file);
+                          compressImage(file).then((compressed) => {
+                            setFormImage(compressed);
+                          }).catch((err) => {
+                            console.error("Compression error:", err);
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              if (event.target?.result) {
+                                setFormImage(event.target.result as string);
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          });
                         }}
                       />
                       <button
@@ -1882,13 +1972,18 @@ CREATE TABLE IF NOT EXISTS orders (
                           if (!files || files.length === 0) return;
                           
                           Array.from(files).forEach((file: any) => {
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              if (event.target?.result) {
-                                setFormImages(prev => [...prev, event.target!.result as string]);
-                              }
-                            };
-                            reader.readAsDataURL(file);
+                            compressImage(file).then((compressed) => {
+                              setFormImages(prev => [...prev, compressed]);
+                            }).catch((err) => {
+                              console.error("Compression error:", err);
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                if (event.target?.result) {
+                                  setFormImages(prev => [...prev, event.target!.result as string]);
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            });
                           });
                         }}
                       />
@@ -2305,13 +2400,18 @@ CREATE TABLE IF NOT EXISTS orders (
                               onChange={(e: any) => {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
-                                const reader = new FileReader();
-                                reader.onload = (event) => {
-                                  if (event.target?.result) {
-                                    setLocalSlides(prev => prev.map((s, i) => i === idx ? { ...s, image: event.target!.result as string } : s));
-                                  }
-                                };
-                                reader.readAsDataURL(file);
+                                compressImage(file).then((compressed) => {
+                                  setLocalSlides(prev => prev.map((s, i) => i === idx ? { ...s, image: compressed } : s));
+                                }).catch((err) => {
+                                  console.error("Compression error:", err);
+                                  const reader = new FileReader();
+                                  reader.onload = (event) => {
+                                    if (event.target?.result) {
+                                      setLocalSlides(prev => prev.map((s, i) => i === idx ? { ...s, image: event.target!.result as string } : s));
+                                    }
+                                  };
+                                  reader.readAsDataURL(file);
+                                });
                               }}
                             />
                           </div>
