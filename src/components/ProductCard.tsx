@@ -16,13 +16,16 @@ export default function ProductCard({
   onAddToCart, 
   isItemInCart 
 }: ProductCardProps) {
-  // Calculate discount percentage
-  const discountPct = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+  // Safeguards for pricing and discounts
+  const price = product.price || 0;
+  const originalPrice = product.originalPrice || price;
+  const discountPct = originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
 
   // Generate WhatsApp order link
   const handleWhatsAppOrder = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const message = `Hello Faizan Traders!\nI want to order your "${product.name}"\nPrice: Rs. ${product.price.toLocaleString()}\nStock Status: In Stock\nPlease confirm my order!`;
+    const productName = product.name || 'Product';
+    const message = `Hello Faizan Traders!\nI want to order your "${productName}"\nPrice: Rs. ${price.toLocaleString()}\nStock Status: In Stock\nPlease confirm my order!`;
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/9203303511464?text=${encodedMessage}`, '_blank');
   };
@@ -48,10 +51,10 @@ export default function ProductCard({
 
       {/* Stock indicators */}
       <div className="absolute top-2.5 right-2.5 z-10">
-        {product.stock < 15 ? (
+        {(product.stock || 0) < 15 ? (
           <span className="flex items-center gap-1.5 rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-medium text-amber-700 border border-amber-200">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-            Only {product.stock} Left
+            Only {product.stock || 0} Left
           </span>
         ) : (
           <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-medium text-emerald-700 border border-emerald-200">
@@ -64,8 +67,8 @@ export default function ProductCard({
       {/* Product Image Container */}
       <div className="relative aspect-square overflow-hidden bg-brand-lightgray">
         <img 
-          src={product.image} 
-          alt={product.name} 
+          src={product.image || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=600&auto=format&fit=crop'} 
+          alt={product.name || 'Product'} 
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
@@ -89,12 +92,12 @@ export default function ProductCard({
       <div className="flex flex-1 flex-col p-4">
         {/* Category micro indicator */}
         <span className="text-[10px] uppercase tracking-wider text-brand-black/40 font-mono font-medium mb-1">
-          {product.category.replace('-', ' ')}
+          {(product.category || 'general').replace('-', ' ')}
         </span>
 
         {/* Product Title */}
         <h3 className="font-display text-sm font-semibold text-brand-black line-clamp-1 group-hover:text-brand-gold transition-colors duration-200">
-          {product.name}
+          {product.name || 'Unnamed Product'}
         </h3>
 
         {/* Star Rating summary and review triggers */}
@@ -103,31 +106,31 @@ export default function ProductCard({
             {Array.from({ length: 5 }).map((_, i) => (
               <Star 
                 key={i} 
-                className={`h-3 w-3 ${i < Math.floor(product.rating) ? 'fill-current' : 'opacity-35'}`} 
+                className={`h-3 w-3 ${i < Math.floor(product.rating || 0) ? 'fill-current' : 'opacity-35'}`} 
               />
             ))}
           </div>
           <span className="text-[10px] font-semibold text-brand-black/70 font-mono">
-            {product.rating}
+            {product.rating || 0}
           </span>
           <span className="text-[9px] text-brand-black/40 font-mono">
-            ({product.reviewsCount} reviews)
+            ({product.reviewsCount || 0} reviews)
           </span>
         </div>
 
         {/* Brief description */}
         <p className="mt-2 text-xs text-brand-black/60 line-clamp-2 leading-relaxed">
-          {product.description}
+          {product.description || ''}
         </p>
 
         {/* Price layout */}
         <div className="mt-auto pt-3.5 flex items-baseline gap-2">
           <span className="font-mono text-base font-bold text-brand-black">
-            Rs. {product.price.toLocaleString()}
+            Rs. {price.toLocaleString()}
           </span>
-          {product.originalPrice > product.price && (
+          {originalPrice > price && (
             <span className="font-mono text-xs text-brand-black/35 line-through">
-              Rs. {product.originalPrice.toLocaleString()}
+              Rs. {originalPrice.toLocaleString()}
             </span>
           )}
         </div>

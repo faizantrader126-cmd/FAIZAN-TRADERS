@@ -16,22 +16,22 @@ export default function ProductModal({
   onAddToCart, 
   isItemInCart 
 }: ProductModalProps) {
-  const [selectedColor, setSelectedColor] = useState<string>(product.variants?.[0] || '');
-  const [selectedSize, setSelectedSize] = useState<string>(product.sizes?.[0] || '');
+  const [selectedColor, setSelectedColor] = useState<string>(product?.variants?.[0] || '');
+  const [selectedSize, setSelectedSize] = useState<string>(product?.sizes?.[0] || '');
   const [quantity, setQuantity] = useState<number>(1);
   const [activeImageIdx, setActiveImageIdx] = useState<number>(0);
   const [customActiveImage, setCustomActiveImage] = useState<string | null>(null);
 
   const handleSelectColor = (v: string) => {
     setSelectedColor(v);
-    if (product.variantImages?.[v]) {
+    if (product?.variantImages?.[v]) {
       setCustomActiveImage(product.variantImages[v]);
     }
   };
 
   const handleSelectSize = (sz: string) => {
     setSelectedSize(sz);
-    if (product.variantImages?.[sz]) {
+    if (product?.variantImages?.[sz]) {
       setCustomActiveImage(product.variantImages[sz]);
     }
   };
@@ -44,8 +44,10 @@ export default function ProductModal({
   const [newReviewText, setNewReviewText] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
 
+  if (!product) return null;
+
   // Calculate discount percentage
-  const discountPct = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+  const discountPct = (product.originalPrice && product.price) ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
   // Variant size markup multipliers (Sofa sizes often affect baseline price)
   const getAdjustedPrice = () => {

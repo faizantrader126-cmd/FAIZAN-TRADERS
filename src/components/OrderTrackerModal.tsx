@@ -16,7 +16,7 @@ export default function OrderTrackerModal({
 }: OrderTrackerModalProps) {
   // Calculate price adjustments
   const getProductPrice = (item: any) => {
-    let p = item.product.price;
+    let p = item.product?.price || 0;
     const size = item.selectedSize;
     if (!size) return p;
     if (size.includes('2 Seater')) p += 500;
@@ -166,7 +166,7 @@ export default function OrderTrackerModal({
                         {ord.items.map((item, id) => (
                           <li key={id} className="py-2 flex items-center justify-between text-zinc-600">
                             <span>
-                              {item.product.name} x {item.quantity} 
+                              {item.product?.name || 'Product'} x {item.quantity} 
                               {item.selectedSize ? ` (Size: ${item.selectedSize})` : ''}
                               {item.selectedColor ? ` | Color: ${item.selectedColor}` : ''}
                             </span>

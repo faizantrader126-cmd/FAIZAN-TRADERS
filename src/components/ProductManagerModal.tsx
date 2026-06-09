@@ -45,8 +45,13 @@ export default function ProductManagerModal({ products, onClose, onSaveProducts,
   
   // Registration and credentials persistence state
   const [registeredAdmin, setRegisteredAdmin] = useState<any>(() => {
-    const stored = localStorage.getItem('faizan_registered_admin');
-    return stored ? JSON.parse(stored) : null;
+    try {
+      const stored = localStorage.getItem('faizan_registered_admin');
+      return stored ? JSON.parse(stored) : null;
+    } catch (e) {
+      console.error('Failed parsing registered admin state:', e);
+      return null;
+    }
   });
 
   const [passcode, setPasscode] = useState('');
@@ -545,7 +550,7 @@ export default function ProductManagerModal({ products, onClose, onSaveProducts,
                     <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
                     <span>👑 First-Time Admin Signup:</span>
                   </p>
-                  <p className="text-[10px] text-zinc-505 font-medium leading-relaxed">
+                  <p className="text-[10px] text-zinc-500 font-medium leading-relaxed">
                     No master credentials found. Please sign up below. <strong>Note:</strong> Maximum 1 administrator slot is supported by the application.
                   </p>
                 </div>

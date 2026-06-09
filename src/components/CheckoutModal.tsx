@@ -30,7 +30,7 @@ export default function CheckoutModal({
 
   // Calculate base price adjustments if Sofa sizes are selected
   const getItemPrice = (item: CartItem) => {
-    let p = item.product.price;
+    let p = item.product?.price || 0;
     const size = item.selectedSize;
     if (!size) return p;
     if (size.includes('2 Seater')) p += 500;
@@ -65,7 +65,7 @@ export default function CheckoutModal({
         item.selectedColor ? `Color: ${item.selectedColor}` : '',
         item.selectedSize ? `Size: ${item.selectedSize}` : ''
       ].filter(Boolean).join(', ');
-      return `${index + 1}. *${item.product.name}* x ${item.quantity} ${specs ? `(${specs})` : ''} = Rs. ${(getItemPrice(item) * item.quantity).toLocaleString()}`;
+      return `${index + 1}. *${item.product?.name || 'Product'}* x ${item.quantity} ${specs ? `(${specs})` : ''} = Rs. ${(getItemPrice(item) * item.quantity).toLocaleString()}`;
     }).join('\n');
 
     return `Assalam-o-Alaikum Faizan Traders! 👋\nNew order has been placed!\n\n📋 *ITEMS ORDERED:*\n${itemsStr}\n\nInvoice Summary:\n- Subtotal: Rs. ${subtotal.toLocaleString()}\n- Discount: Rs. ${discountAmount.toLocaleString()}\n- Shipping: ${shippingCost === 0 ? 'FREE' : `Rs. ${shippingCost}`}\n- *TOTAL AMOUNT: Rs. ${totalAmount.toLocaleString()}*\n\n📍 *SHIPPING DETAILS:*\n- *Name:* ${formData.name}\n- *Phone:* ${formData.phone}\n- *WhatsApp:* ${formData.whatsapp || formData.phone}\n- *Address:* ${formData.address}\n- *City:* ${formData.city}\n- *Notes:* ${formData.notes || 'None'}\n\nPayment Method: Cash On Delivery (COD) 🇵🇰\nPlease verify this order!`;
@@ -323,10 +323,10 @@ export default function CheckoutModal({
               {cartItems.map((item, id) => (
                 <div key={id} className="flex gap-3 text-left">
                   <div className="h-11 w-11 shrink-0 overflow-hidden rounded-md border border-brand-black/5 bg-white">
-                    <img src={item.product.image} className="h-full w-full object-cover" />
+                    <img src={item.product?.image || ''} className="h-full w-full object-cover" alt={item.product?.name || 'Product'} />
                   </div>
                   <div className="flex-1 flex flex-col justify-center">
-                    <h5 className="text-[11px] font-bold text-brand-black leading-tight line-clamp-1">{item.product.name}</h5>
+                    <h5 className="text-[11px] font-bold text-brand-black leading-tight line-clamp-1">{item.product?.name || 'Product'}</h5>
                     <div className="text-[9px] text-brand-black/50 font-mono mt-0.5">
                       {item.quantity} x Rs. {getItemPrice(item).toLocaleString()} 
                       {item.selectedSize && ` | Size: ${item.selectedSize}`}

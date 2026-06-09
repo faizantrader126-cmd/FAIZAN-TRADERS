@@ -60,15 +60,17 @@ export default function App() {
     if (saved) {
       try { 
         const parsed = JSON.parse(saved) as Product[];
-        // Merge missing default items (e.g. newly introduced categories/items)
-        const existingIds = new Set(parsed.map(p => p.id));
-        const missing = PRODUCTS.filter(p => !existingIds.has(p.id));
-        if (missing.length > 0) {
-          const merged = [...parsed, ...missing];
-          localStorage.setItem('faizan_traders_products', JSON.stringify(merged));
-          return merged;
+        if (Array.isArray(parsed)) {
+          // Merge missing default items (e.g. newly introduced categories/items)
+          const existingIds = new Set(parsed.map(p => p.id));
+          const missing = PRODUCTS.filter(p => !existingIds.has(p.id));
+          if (missing.length > 0) {
+            const merged = [...parsed, ...missing];
+            localStorage.setItem('faizan_traders_products', JSON.stringify(merged));
+            return merged;
+          }
+          return parsed; 
         }
-        return parsed; 
       } catch (e) { 
         console.error(e); 
       }
@@ -85,7 +87,12 @@ export default function App() {
   const [slides, setSlides] = useState<BannerSlide[]>(() => {
     const saved = localStorage.getItem('faizan_traders_slides');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error(e); }
+      try { 
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      } catch (e) { console.error(e); }
     }
     return BANNER_SLIDES;
   });
@@ -97,6 +104,14 @@ export default function App() {
 
   // Home slides banner ticker
   const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
+
+  // Safeguard: Ensure currentSlideIdx is always within bounds of active slides
+  useEffect(() => {
+    const activeLength = Array.isArray(slides) ? slides.length : 0;
+    if (activeLength > 0 && currentSlideIdx >= activeLength) {
+      setCurrentSlideIdx(0);
+    }
+  }, [slides, currentSlideIdx]);
 
   // Flash sales deal countdown
   const [countdown, setCountdown] = useState({ hours: 4, minutes: 34, seconds: 12 });
@@ -112,10 +127,20 @@ export default function App() {
     const savedCart = localStorage.getItem('faizan_traders_cart');
     const savedOrders = localStorage.getItem('faizan_traders_orders');
     if (savedCart) {
-      try { setCartItems(JSON.parse(savedCart)); } catch (e) { console.error(e); }
+      try { 
+        const parsed = JSON.parse(savedCart);
+        if (Array.isArray(parsed)) {
+          setCartItems(parsed);
+        }
+      } catch (e) { console.error(e); }
     }
     if (savedOrders) {
-      try { setOrders(JSON.parse(savedOrders)); } catch (e) { console.error(e); }
+      try { 
+        const parsed = JSON.parse(savedOrders);
+        if (Array.isArray(parsed)) {
+          setOrders(parsed);
+        }
+      } catch (e) { console.error(e); }
     }
   }, []);
 
@@ -287,7 +312,7 @@ export default function App() {
       />
       {/* 2. Hero Slideshow banner (Full Width Edge-to-Edge) */}
       <section className="relative overflow-hidden bg-brand-charcoal w-full text-white">
-        <div className="absolute inset-0 bg-radial-gradient from-zinc-805/10 via-transparent to-transparent opacity-85 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-zinc-800/20 via-transparent to-transparent opacity-85 pointer-events-none" />
 
         {slides.length > 0 && slides[currentSlideIdx] ? (
           <div className="w-full relative z-10">

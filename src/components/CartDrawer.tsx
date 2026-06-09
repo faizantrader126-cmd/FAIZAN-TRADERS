@@ -24,7 +24,7 @@ export default function CartDrawer({
 
   // Calculate base price adjustments if Sofa sizes are selected
   const getItemPrice = (item: CartItem) => {
-    let p = item.product.price;
+    let p = item.product?.price || 0;
     const size = item.selectedSize;
     if (!size) return p;
     if (size.includes('2 Seater')) p += 500;
@@ -138,16 +138,19 @@ export default function CartDrawer({
             <div className="space-y-4">
               {cartItems.map((item, index) => {
                 const itemPrice = getItemPrice(item);
+                const productId = item.product?.id || `unknown-${index}`;
+                const productName = item.product?.name || 'Product';
+                const productImage = item.product?.image || '';
                 return (
                   <div 
-                    key={`${item.product.id}-${item.selectedColor}-${item.selectedSize}-${index}`}
+                    key={`${productId}-${item.selectedColor || ''}-${item.selectedSize || ''}-${index}`}
                     className="flex gap-4 p-3.5 bg-brand-lightgray/50 rounded-xl border border-brand-black/5 relative group transition-all hover:bg-zinc-50"
                   >
                     {/* Item Thumbnail */}
                     <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-white border border-brand-black/5 shadow-xs">
                       <img 
-                        src={item.product.image} 
-                        alt={item.product.name} 
+                        src={productImage} 
+                        alt={productName} 
                         className="h-full w-full object-cover"
                       />
                     </div>
@@ -156,21 +159,21 @@ export default function CartDrawer({
                     <div className="flex-1 flex flex-col justify-between text-left">
                       <div>
                         <h4 className="text-xs font-bold text-brand-black leading-tight line-clamp-1 pr-6">
-                          {item.product.name}
+                          {productName}
                         </h4>
                         
                         {/* Selections indicators values */}
                         <div className="flex gap-2 flex-wrap mt-1">
-                          {item.selectedColor && (
-                            <span className="bg-white/80 border border-brand-black/5 text-[9px] px-1.5 py-0.5 rounded-md text-brand-black/60 font-mono font-medium">
-                              Color: {item.selectedColor}
-                            </span>
-                          )}
-                          {item.selectedSize && (
-                            <span className="bg-white/80 border border-brand-black/5 text-[9px] px-1.5 py-0.5 rounded-md text-brand-gold font-mono font-bold">
-                              Size: {item.selectedSize}
-                            </span>
-                          )}
+                           {item.selectedColor && (
+                             <span className="bg-white/80 border border-brand-black/5 text-[9px] px-1.5 py-0.5 rounded-md text-brand-black/60 font-mono font-medium">
+                               Color: {item.selectedColor}
+                             </span>
+                           )}
+                           {item.selectedSize && (
+                             <span className="bg-white/80 border border-brand-black/5 text-[9px] px-1.5 py-0.5 rounded-md text-brand-gold font-mono font-bold">
+                               Size: {item.selectedSize}
+                             </span>
+                           )}
                         </div>
                       </div>
 
@@ -178,7 +181,7 @@ export default function CartDrawer({
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center bg-white border border-brand-black/5 rounded-lg overflow-hidden scale-90 origin-left">
                           <button 
-                            onClick={() => onUpdateQty(item.product.id, -1, item.selectedColor, item.selectedSize)}
+                            onClick={() => onUpdateQty(productId, -1, item.selectedColor, item.selectedSize)}
                             className="px-2 py-1 hover:bg-brand-lightgray text-brand-black font-extrabold"
                           >
                             -
@@ -187,7 +190,7 @@ export default function CartDrawer({
                             {item.quantity}
                           </span>
                           <button 
-                            onClick={() => onUpdateQty(item.product.id, 1, item.selectedColor, item.selectedSize)}
+                            onClick={() => onUpdateQty(productId, 1, item.selectedColor, item.selectedSize)}
                             className="px-2 py-1 hover:bg-brand-lightgray text-brand-black font-extrabold"
                           >
                             +
@@ -202,7 +205,7 @@ export default function CartDrawer({
 
                     {/* Trash Delete button */}
                     <button 
-                      onClick={() => onRemoveItem(item.product.id, item.selectedColor, item.selectedSize)}
+                      onClick={() => onRemoveItem(productId, item.selectedColor, item.selectedSize)}
                       className="absolute top-3.5 right-3.5 text-brand-black/30 hover:text-red-600 transition-colors cursor-pointer"
                     >
                       <Trash2 className="h-4 w-4" />
