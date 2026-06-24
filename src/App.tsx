@@ -9,7 +9,7 @@ import Logo from './components/Logo';
 import ProductManagerModal from './components/ProductManagerModal';
 
 // Data models
-import { PRODUCTS, CATEGORIES, BANNER_SLIDES, REVIEWS } from './data';
+import { PRODUCTS, CATEGORIES, BANNER_SLIDES, REVIEWS, COLLECTIONS } from './data';
 import { Product, CartItem, Order, BannerSlide } from './types';
 import { saveInquiryToSupabase } from './lib/supabase';
 
@@ -415,222 +415,446 @@ export default function App() {
         )}
       </section>
 
-      {/* 3. Circular Category Shortcuts bar */}
-      <section className="py-12 bg-white border-b border-brand-black/5 shadow-xs">
+      {/* 3. Shop by Collection - Circular Badges */}
+      <section className="py-12 bg-white border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-brand-black/45">Quick Category Shortcuts</h3>
-          <h2 className="font-display text-2xl sm:text-3xl font-black text-brand-black mt-1">Explore Our Collections</h2>
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-600 block mb-1">
+            KIDS COUTURE
+          </span>
+          <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight">
+            Shop by Collection
+          </h2>
           
-          <div className="mt-8 grid grid-cols-3 sm:grid-cols-6 gap-4 sm:gap-6">
-            <button
-              onClick={() => {
-                setActiveCategory('all');
-                document.getElementById('product-catalog-grid')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="flex flex-col items-center group cursor-pointer text-center"
-            >
-              <div className={`h-14 w-14 sm:h-16 sm:w-16 rounded-full flex items-center justify-center border-2 shadow-xs transition-all duration-300 ${
-                activeCategory === 'all' 
-                  ? 'border-brand-black bg-brand-black text-white scale-105' 
-                  : 'border-zinc-200 bg-zinc-50 group-hover:border-zinc-400 group-hover:scale-105'
-              }`}>
-                <ShoppingBag className="h-6 w-6" />
-              </div>
-              <span className={`text-xs mt-3 font-semibold transition-colors leading-tight ${
-                activeCategory === 'all' ? 'text-brand-black font-extrabold' : 'text-brand-black/60 group-hover:text-brand-black'
-              }`}>
-                All Products
-              </span>
-            </button>
-
-            {CATEGORIES.map((cat) => {
-              const isActive = activeCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    setActiveCategory(cat.id);
-                    document.getElementById('product-catalog-grid')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className="flex flex-col items-center group cursor-pointer text-center"
-                >
-                  <div className={`h-14 w-14 sm:h-16 sm:w-16 rounded-full flex items-center justify-center border-2 shortcut-icon-box shadow-xs transition-all duration-300 ${
-                    isActive 
-                      ? 'border-brand-black bg-brand-black text-white scale-105' 
-                      : 'border-zinc-200 bg-zinc-50 group-hover:border-zinc-400 group-hover:scale-105'
-                  }`}>
-                    <div className={isActive ? 'text-white [&>*]:text-white' : ''}>
-                      {getCategoryIcon(cat.icon)}
-                    </div>
-                  </div>
-                  <span className={`text-xs mt-3 font-semibold transition-colors leading-tight line-clamp-1 ${
-                    isActive ? 'text-brand-black font-extrabold' : 'text-brand-black/60 group-hover:text-brand-black'
-                  }`}>
-                    {cat.name.split(' & ')[0]}
-                  </span>
-                  <span className="text-[9px] text-zinc-400 font-mono mt-0.5">{cat.count} items</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Active Catalog Block (Sales Countdown + Filter options + Target Grid) */}
-      <section id="product-catalog-grid" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Sales Headline Banner with Digital simulated Countdown clock */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 border-b border-brand-black/10 pb-6 mb-8 text-left">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-red-600 animate-ping" />
-              <h2 className="font-display text-2xl sm:text-3xl font-black text-brand-black uppercase tracking-tight">
-                {activeCategory === 'all' ? 'Faizan traders shop items' : CATEGORIES.find(c => c.id === activeCategory)?.name}
-              </h2>
-            </div>
-            <p className="text-xs text-brand-black/50 mt-1 max-w-xl">
-              Showing <span className="font-bold text-brand-black">{filteredProducts.length}</span> high-quality items available for nationwide delivery across Pakistan.
-            </p>
-          </div>
-
-          {/* Flash Sale simulated clock limits */}
-          <div className="flex items-center gap-3 bg-red-50 border border-red-200/60 p-3 rounded-xl shadow-xs self-stretch lg:self-auto">
-            <span className="text-[10px] font-extrabold text-red-700 uppercase tracking-widest font-mono shrink-0 pl-1">
-              ⚡ Flash Deals Ends In:
-            </span>
-            <div className="flex items-center gap-1 text-red-800 font-mono font-bold text-sm">
-              <span className="bg-red-700/10 text-red-800 px-2 py-1 rounded-md min-w-[2rem] text-center">
-                {String(countdown.hours).padStart(2, '0')}
-              </span>
-              <span>:</span>
-              <span className="bg-red-700/10 text-red-800 px-2 py-1 rounded-md min-w-[2rem] text-center">
-                {String(countdown.minutes).padStart(2, '0')}
-              </span>
-              <span>:</span>
-              <span className="bg-red-700/10 text-red-800 px-2 py-1 rounded-md min-w-[2rem] text-center">
-                {String(countdown.seconds).padStart(2, '0')}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Filter Controls Strip */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white border border-brand-black/5 p-4 rounded-xl mb-8 shadow-xs w-full">
-          {/* Active Search indicators tag */}
-          <div className="text-left w-full sm:w-auto">
-            {searchQuery ? (
-              <p className="text-xs text-zinc-500 font-medium">
-                Active search: <strong className="text-brand-black">"{searchQuery}"</strong>
-                <button 
-                  onClick={() => setSearchQuery('')}
-                  className="text-red-600 hover:underline font-bold ml-2 text-[10px] uppercase font-mono tracking-wide"
-                >
-                  Clear search✕
-                </button>
-              </p>
-            ) : (
-              <p className="text-xs text-zinc-500 font-medium">
-                Filter: <span className="font-bold text-brand-black">{activeCategory === 'all' ? 'Comprehensive Inventory' : activeCategory.replace('-', ' ')}</span>
-              </p>
-            )}
-          </div>
-
-          {/* Sort By selects */}
-          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-            <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">Sort By:</label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-brand-lightgray border border-brand-black/5 rounded-lg px-3 py-1.5 text-xs text-brand-black font-semibold focus:outline-hidden cursor-pointer"
-            >
-              <option value="popular">Popular Sellers</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="rating">Best Rated Reviews</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Dynamic Products Grid */}
-        {filteredProducts.length === 0 ? (
-          <div className="bg-white border border-brand-black/5 rounded-2xl p-12 text-center shadow-xs">
-            <AlertCircle className="h-10 w-10 text-brand-black/35 mx-auto mb-3" />
-            <h4 className="font-display text-sm font-bold text-brand-black">No products match your filters!</h4>
-            <p className="text-xs text-zinc-500 max-w-xs mx-auto mt-1 leading-relaxed">
-              We couldn't locate items matching your exact search text. Try adjusting your vocabulary spelling or resetting category filters!
-            </p>
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setActiveCategory('all');
-              }}
-              className="mt-4 bg-brand-black text-white hover:bg-zinc-800 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg transition-colors cursor-pointer"
-            >
-              Reset All Filters
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {filteredProducts.map((prod) => (
-              <ProductCard
-                key={prod.id}
-                product={prod}
-                onViewDetails={setSelectedProduct}
-                onAddToCart={(p) => handleAddToCart(p, 1)}
-                isItemInCart={cartItems.some(item => item.product.id === prod.id)}
-              />
+          <div className="mt-8 flex items-center justify-start sm:justify-center gap-6 overflow-x-auto pb-4 scrollbar-none">
+            {COLLECTIONS.map((col) => (
+              <button
+                key={col.id}
+                onClick={() => {
+                  setSearchQuery('');
+                  // Support filter by text query if matching collections
+                  if (col.id === 'bodysuits') setSearchQuery('suit');
+                  else if (col.id === 'starter-sets') setSearchQuery('set');
+                  else if (col.id === 't-shirts') setSearchQuery('t-shirt');
+                  else if (col.id === 'girls-frocks') setSearchQuery('girls');
+                  else if (col.id === 'jewelry-sets') setSearchQuery('suit');
+                  else {
+                    setActiveCategory('all');
+                  }
+                  document.getElementById('product-catalog-grid')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="flex flex-col items-center group shrink-0 cursor-pointer text-center"
+              >
+                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full overflow-hidden border-2 border-neutral-100 group-hover:border-blue-600 transition-all duration-300 scale-100 group-hover:scale-105 shadow-xs">
+                  <img 
+                    src={col.image} 
+                    alt={col.name} 
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <span className="text-xs font-bold text-neutral-800 mt-3 group-hover:text-blue-600 transition-colors">
+                  {col.name}
+                </span>
+              </button>
             ))}
           </div>
-        )}
+        </div>
       </section>
 
-      {/* 5. Why Choose Faizan Traders Trust Section */}
-      <section className="bg-brand-lightgray/50 py-16 border-t border-b border-brand-black/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-left">
-          <span className="text-xs font-bold tracking-[0.15em] text-zinc-400 font-mono uppercase block mb-1">Our Standard Values</span>
-          <h2 className="font-display text-2xl sm:text-3xl font-black text-brand-black">Why Shop At Faizan Traders?</h2>
+      {/* 4. Main Contents Block (Bento Lookbook Home vs Filtered Search Grid) */}
+      {activeCategory !== 'all' || searchQuery !== '' ? (
+        // --- FILTERED SEARCH RESULTS GRID ---
+        <section id="product-catalog-grid" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 border-b border-neutral-200 pb-6 mb-8 text-left">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <span className="h-2 w-2 rounded-full bg-red-600 animate-ping" />
+                <h2 className="font-display text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">
+                  {searchQuery ? `Search Results` : CATEGORIES.find(c => c.id === activeCategory)?.name}
+                </h2>
+              </div>
+              <p className="text-xs text-neutral-400 mt-1 max-w-xl">
+                Showing <span className="font-bold text-black">{filteredProducts.length}</span> premium baby items.
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3 bg-black border border-neutral-900 p-3 rounded-xl shadow-md self-stretch lg:self-auto text-white">
+              <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest font-mono shrink-0 pl-1">
+                ⚡ FLASH DEAL ENDS IN:
+              </span>
+              <div className="flex items-center gap-1 font-mono font-bold text-xs">
+                <span className="bg-neutral-800 text-white px-2.5 py-1 rounded-md min-w-[2rem] text-center border border-neutral-700">
+                  {String(countdown.hours).padStart(2, '0')}
+                </span>
+                <span className="text-neutral-500">:</span>
+                <span className="bg-neutral-800 text-white px-2.5 py-1 rounded-md min-w-[2rem] text-center border border-neutral-700">
+                  {String(countdown.minutes).padStart(2, '0')}
+                </span>
+                <span className="text-neutral-500">:</span>
+                <span className="bg-neutral-800 text-white px-2.5 py-1 rounded-md min-w-[2rem] text-center border border-neutral-700">
+                  {String(countdown.seconds).padStart(2, '0')}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white border border-neutral-200 p-4 rounded-xl mb-8 shadow-xs w-full">
+            <div className="text-left w-full sm:w-auto">
+              {searchQuery ? (
+                <p className="text-xs text-neutral-500 font-bold">
+                  Active search: <strong className="text-black">"{searchQuery}"</strong>
+                  <button 
+                    onClick={() => setSearchQuery('')}
+                    className="text-red-600 hover:underline font-bold ml-2 text-[10px] uppercase font-mono tracking-wide"
+                  >
+                    Clear✕
+                  </button>
+                </p>
+              ) : (
+                <p className="text-xs text-neutral-500 font-bold">
+                  Filter: <span className="font-extrabold text-black">{activeCategory.replace('-', ' ')}</span>
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+              <label className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Sort By:</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-1.5 text-xs text-black font-extrabold focus:outline-hidden cursor-pointer hover:border-black transition-colors"
+              >
+                <option value="popular">Popular Sellers</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="rating">Best Rated Reviews</option>
+              </select>
+            </div>
+          </div>
+
+          {filteredProducts.length === 0 ? (
+            <div className="bg-white border border-neutral-200 rounded-2xl p-12 text-center shadow-xs">
+              <AlertCircle className="h-10 w-10 text-neutral-300 mx-auto mb-3" />
+              <h4 className="font-display text-sm font-bold text-black">No products match your filters!</h4>
+              <p className="text-xs text-neutral-500 max-w-xs mx-auto mt-1 leading-relaxed">
+                Try adjusting your search query or reset filters.
+              </p>
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setActiveCategory('all');
+                }}
+                className="mt-4 bg-black text-white hover:bg-neutral-800 text-[10px] font-bold uppercase tracking-widest px-4 py-2.5 rounded-lg transition-colors cursor-pointer"
+              >
+                Reset Filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 animate-fade-in">
+              {filteredProducts.map((prod) => (
+                <ProductCard
+                  key={prod.id}
+                  product={prod}
+                  onViewDetails={setSelectedProduct}
+                  onAddToCart={(p) => handleAddToCart(p, 1)}
+                  isItemInCart={cartItems.some(item => item.product.id === prod.id)}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      ) : (
+        // --- PREMIUM BENTO LOOKBOOK HOMEPAGE (No Filters Active) ---
+        <div id="product-catalog-grid" className="space-y-16 py-12 bg-neutral-50/30">
+          
+          {/* Section A: New Arrivals Grid */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
+              <div>
+                <span className="text-[10px] font-black tracking-widest text-blue-600 uppercase font-mono">SWEET DEALS • 30% OFF</span>
+                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">New Arrivals</h2>
+              </div>
+              <button 
+                onClick={() => setActiveCategory('new-arrivals')}
+                className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
+              >
+                View all new styles &rarr;
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {products.filter(p => p.category === 'new-arrivals').slice(0, 4).map((prod) => (
+                <ProductCard
+                  key={prod.id}
+                  product={prod}
+                  onViewDetails={setSelectedProduct}
+                  onAddToCart={(p) => handleAddToCart(p, 1)}
+                  isItemInCart={cartItems.some(item => item.product.id === prod.id)}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* Section B: Best Sellers Grid */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
+              <div>
+                <span className="text-[10px] font-black tracking-widest text-amber-500 uppercase font-mono">MOST POPULAR • LOVED BY MOMS</span>
+                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Best Sellers</h2>
+              </div>
+              <button 
+                onClick={() => setActiveCategory('best-sellers')}
+                className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
+              >
+                View all best sellers &rarr;
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {products.filter(p => p.category === 'best-sellers').slice(0, 4).map((prod) => (
+                <ProductCard
+                  key={prod.id}
+                  product={prod}
+                  onViewDetails={setSelectedProduct}
+                  onAddToCart={(p) => handleAddToCart(p, 1)}
+                  isItemInCart={cartItems.some(item => item.product.id === prod.id)}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* Section C: Shorts & Pants - Bento Spotlight Layout */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
+              <div>
+                <span className="text-[10px] font-black tracking-widest text-emerald-600 uppercase font-mono">DURABLE COTTON & WASHED DENIM</span>
+                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Shorts & Pants</h2>
+              </div>
+              <button 
+                onClick={() => setActiveCategory('shorts-pants')}
+                className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
+              >
+                View all shorts &rarr;
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Premium Lookbook Promotional Banner Card (1/3 wide) */}
+              <div className="lg:col-span-4 relative rounded-2xl overflow-hidden aspect-4/5 lg:aspect-auto bg-neutral-900 text-white min-h-[350px] lg:min-h-full flex flex-col justify-end p-6 sm:p-8 shadow-md group">
+                <img 
+                  src="https://images.unsplash.com/photo-1519689680058-324335c77ebe?auto=format&fit=crop&q=80&w=600" 
+                  alt="Shorts and Pants Lookbook" 
+                  className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
+                
+                <div className="relative z-10 text-left space-y-3">
+                  <span className="bg-emerald-500 text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    FLAT 30% OFF
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
+                    Playful & Flexible Shorts
+                  </h3>
+                  <p className="text-zinc-200 text-xs">
+                    Engineered in ultra-stretch pre-softened cotton to allow unlimited bounds, rolls & crawly adventures.
+                  </p>
+                  <div className="pt-2">
+                    <button 
+                      onClick={() => setActiveCategory('shorts-pants')}
+                      className="bg-white text-black hover:bg-emerald-400 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                    >
+                      Shop Collection
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3-Column Product List Next to it (2/3 wide) */}
+              <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {products.filter(p => p.category === 'shorts-pants').slice(0, 3).map((prod) => (
+                  <ProductCard
+                    key={prod.id}
+                    product={prod}
+                    onViewDetails={setSelectedProduct}
+                    onAddToCart={(p) => handleAddToCart(p, 1)}
+                    isItemInCart={cartItems.some(item => item.product.id === prod.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Section D: Nightsuits - Bento Spotlight Layout */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
+              <div>
+                <span className="text-[10px] font-black tracking-widest text-purple-600 uppercase font-mono">COZY DREAMS • WINTER SOFT JERSEY</span>
+                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Nightsuits Collection</h2>
+              </div>
+              <button 
+                onClick={() => setActiveCategory('nightsuits')}
+                className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
+              >
+                View all nightsuits &rarr;
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* 3-Column Product List (2/3 wide) */}
+              <div className="lg:col-span-8 order-2 lg:order-1 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {products.filter(p => p.category === 'nightsuits').slice(0, 3).map((prod) => (
+                  <ProductCard
+                    key={prod.id}
+                    product={prod}
+                    onViewDetails={setSelectedProduct}
+                    onAddToCart={(p) => handleAddToCart(p, 1)}
+                    isItemInCart={cartItems.some(item => item.product.id === prod.id)}
+                  />
+                ))}
+              </div>
+
+              {/* Premium Lookbook Promotional Banner Card (1/3 wide) on the right */}
+              <div className="lg:col-span-4 order-1 lg:order-2 relative rounded-2xl overflow-hidden aspect-4/5 lg:aspect-auto bg-neutral-900 text-white min-h-[350px] lg:min-h-full flex flex-col justify-end p-6 sm:p-8 shadow-md group">
+                <img 
+                  src="https://images.unsplash.com/photo-1541412031570-3df08e9d4df2?auto=format&fit=crop&q=80&w=600" 
+                  alt="Nightsuits Lookbook" 
+                  className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
+                
+                <div className="relative z-10 text-left space-y-3">
+                  <span className="bg-purple-500 text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    SWEET COMFORT
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
+                    Dreamy Soft Pajama Sets
+                  </h3>
+                  <p className="text-zinc-200 text-xs">
+                    Designed in dual-layered combed interlock knit to secure premium sleep comfort during breezy cold nights.
+                  </p>
+                  <div className="pt-2">
+                    <button 
+                      onClick={() => setActiveCategory('nightsuits')}
+                      className="bg-white text-black hover:bg-purple-400 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                    >
+                      Shop Cozy Wear
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Section E: Essentials & Nursery Backpacks - Bento Spotlight Layout */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
+              <div>
+                <span className="text-[10px] font-black tracking-widest text-amber-600 uppercase font-mono">BABY CARRY PODS, BAGS & LUXURY GIFTBOXES</span>
+                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Baby Essentials</h2>
+              </div>
+              <button 
+                onClick={() => setActiveCategory('essentials')}
+                className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
+              >
+                View all essentials &rarr;
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Premium Lookbook Promotional Banner Card (1/3 wide) */}
+              <div className="lg:col-span-4 relative rounded-2xl overflow-hidden aspect-4/5 lg:aspect-auto bg-neutral-900 text-white min-h-[350px] lg:min-h-full flex flex-col justify-end p-6 sm:p-8 shadow-md group">
+                <img 
+                  src="https://images.unsplash.com/photo-1595079676339-1534801ad6cf?auto=format&fit=crop&q=80&w=600" 
+                  alt="Essentials Lookbook" 
+                  className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
+                
+                <div className="relative z-10 text-left space-y-3">
+                  <span className="bg-amber-500 text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    MUST-HAVE SETS
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
+                    Nursery Pods & Travel Bags
+                  </h3>
+                  <p className="text-zinc-200 text-xs">
+                    Multi-compartment insulated nursery bags and soft baby pods made with deep affection.
+                  </p>
+                  <div className="pt-2">
+                    <button 
+                      onClick={() => setActiveCategory('essentials')}
+                      className="bg-white text-black hover:bg-amber-400 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                    >
+                      Shop Essentials
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3-Column Product List (2/3 wide) */}
+              <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {products.filter(p => p.category === 'essentials').slice(0, 3).map((prod) => (
+                  <ProductCard
+                    key={prod.id}
+                    product={prod}
+                    onViewDetails={setSelectedProduct}
+                    onAddToCart={(p) => handleAddToCart(p, 1)}
+                    isItemInCart={cartItems.some(item => item.product.id === prod.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+
+        </div>
+      )}
+
+      {/* 5. Why Choose The Sweet Baby Shop Trust Section */}
+      <section className="bg-neutral-50/50 py-16 border-t border-b border-neutral-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
+          <span className="text-xs font-bold tracking-[0.15em] text-blue-500 font-mono uppercase block mb-1">Our Standard Values</span>
+          <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight">Why Shop With Us?</h2>
           
           {/* Bento grid layout items */}
-          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 text-left">
             
-            <div className="bg-white p-6 rounded-xl border border-brand-black/5 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-xs">
-              <div className="rounded-full bg-emerald-50 text-emerald-700 h-11 w-11 flex items-center justify-center border border-emerald-100 mb-4">
+            <div className="bg-white p-6 rounded-xl border border-neutral-100 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-sm">
+              <div className="rounded-full bg-blue-50 text-blue-600 h-11 w-11 flex items-center justify-center mb-4">
                 <ShieldCheck className="h-5.5 w-5.5" />
               </div>
-              <h4 className="text-sm font-bold text-brand-black">Quality Assurance</h4>
-              <p className="text-xs text-zinc-500 mt-2 leading-relaxed">Every item is carefully checked to verify durability, specifications, and performance.</p>
+              <h4 className="text-sm font-bold text-neutral-900 tracking-tight">Premium Cotton Care</h4>
+              <p className="text-xs text-neutral-500 mt-2 leading-relaxed">Every item is checked to verify non-allergenic, extra-soft fabrics suitable for newborn skin.</p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-brand-black/5 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-xs">
-              <div className="rounded-full bg-blue-50 text-blue-700 h-11 w-11 flex items-center justify-center border border-blue-100 mb-4 font-bold text-lg font-mono">
+            <div className="bg-white p-6 rounded-xl border border-neutral-100 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-sm">
+              <div className="rounded-full bg-blue-50 text-blue-600 h-11 w-11 flex items-center justify-center mb-4 font-bold text-base font-mono">
                 Rs.
               </div>
-              <h4 className="text-sm font-bold text-brand-black">Competitive Pricing</h4>
-              <p className="text-xs text-zinc-500 mt-2 leading-relaxed">Direct sourcing allows us to offer premium products without middleman retail inflations.</p>
+              <h4 className="text-sm font-bold text-neutral-900 tracking-tight">Honest Factory Rates</h4>
+              <p className="text-xs text-neutral-500 mt-2 leading-relaxed">Direct manufacturer sourcing allows us to offer adorable designs without heavy retail markups.</p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-brand-black/5 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-xs">
-              <div className="rounded-full bg-purple-50 text-purple-700 h-11 w-11 flex items-center justify-center border border-purple-100 mb-4">
+            <div className="bg-white p-6 rounded-xl border border-neutral-100 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-sm">
+              <div className="rounded-full bg-purple-50 text-purple-600 h-11 w-11 flex items-center justify-center mb-4">
                 <Clock className="h-5.5 w-5.5" />
               </div>
-              <h4 className="text-sm font-bold text-brand-black">Customer Support</h4>
-              <p className="text-xs text-zinc-500 mt-2 leading-relaxed">Friendly support assistants ready to assist on Call and WhatsApp chat queries instantly.</p>
+              <h4 className="text-sm font-bold text-neutral-900 tracking-tight">Loving WhatsApp Support</h4>
+              <p className="text-xs text-neutral-500 mt-2 leading-relaxed">Our friendly assistants are available on Chat to help with sizing recommendations.</p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-brand-black/5 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-xs">
-              <div className="rounded-full bg-amber-50 text-amber-700 h-11 w-11 flex items-center justify-center border border-amber-100 mb-4">
+            <div className="bg-white p-6 rounded-xl border border-neutral-100 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-sm">
+              <div className="rounded-full bg-amber-50 text-amber-600 h-11 w-11 flex items-center justify-center mb-4">
                 <Sparkles className="h-5.5 w-5.5" />
               </div>
-              <h4 className="text-sm font-bold text-brand-black">Wide Product Range</h4>
-              <p className="text-xs text-zinc-500 mt-2 leading-relaxed">Exploring thousand products across sofa configurations, smart gadgets, and appliances.</p>
+              <h4 className="text-sm font-bold text-neutral-900 tracking-tight">Handpicked Boutique Sets</h4>
+              <p className="text-xs text-neutral-500 mt-2 leading-relaxed">Beautiful matching sets, rompers, jewelry accessories, and custom styles curated for your family.</p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-brand-black/5 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-xs">
-              <div className="rounded-full bg-rose-50 text-rose-700 h-11 w-11 flex items-center justify-center border border-rose-100 mb-4">
+            <div className="bg-white p-6 rounded-xl border border-neutral-100 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-sm">
+              <div className="rounded-full bg-rose-50 text-rose-600 h-11 w-11 flex items-center justify-center mb-4">
                 <Truck className="h-5.5 w-5.5" />
               </div>
-              <h4 className="text-sm font-bold text-brand-black">Fast Delivery</h4>
-              <p className="text-xs text-zinc-500 mt-2 leading-relaxed">Quick and secure courier parcels nationwide across Pakistan with Cash on Delivery options.</p>
+              <h4 className="text-sm font-bold text-neutral-900 tracking-tight">Rapid Pakistan Shipping</h4>
+              <p className="text-xs text-neutral-500 mt-2 leading-relaxed">Fast delivery to Karachi, Lahore, Islamabad, and nationwide with Cash on Delivery options.</p>
             </div>
 
           </div>
@@ -642,48 +866,48 @@ export default function App() {
         
         {/* Story Text left */}
         <div className="md:col-span-7 space-y-6">
-          <span className="text-xs font-bold tracking-[0.15em] text-brand-gold uppercase font-mono">Faizan Traders Story</span>
-          <h2 className="font-display text-3xl sm:text-4xl font-black text-brand-black leading-tight">
-            Connecting Quality & Affordability Since Inception
+          <span className="text-xs font-bold tracking-[0.15em] text-blue-600 uppercase font-mono">Our Beautiful Story</span>
+          <h2 className="font-display text-3xl sm:text-4xl font-black text-neutral-950 leading-tight tracking-tight">
+            Nurturing Soft Cuddles & Happy Little Smiles
           </h2>
-          <p className="text-sm text-zinc-600 leading-relaxed">
-            Faizan Traders is a growing retail and wholesale business specializing in home improvement products, kitchen essentials, home appliances, mobile accessories, and innovative daily-use gadgets.
+          <p className="text-sm text-neutral-600 leading-relaxed">
+            The Sweet Baby Shop is Pakistan’s favorite online destination for premium infant, baby, and young children wear. We curate comfortable, highly breathable, and fashionable garments that ensure absolute joy for kids and parents.
           </p>
-          <p className="text-sm text-zinc-600 leading-relaxed">
-            Our goal is to provide customers with practical, stylish, and affordable products that enhance everyday living. Whether you're upgrading your living room with premium fitted elastic sofa covers, organizing your pantry cabinets, or looking for useful gadgets, Faizan Traders offers reliable products for every single need.
+          <p className="text-sm text-neutral-600 leading-relaxed">
+            From playful matching shorts sets to winter nightsuits and dazzling kids jewelry packs, we believe every child deserves boutique luxury combined with honest pricing. We carefully handpick our combed-cotton lines to avoid synthetic irritations.
           </p>
-          <p className="text-sm text-zinc-700 font-bold leading-relaxed border-l-4 border-brand-black pl-4">
-            We focus on quality, trust, and customer satisfaction, making us a preferred choice for thousands of shopping families and businesses across Pakistan.
+          <p className="text-sm text-neutral-800 font-bold leading-relaxed border-l-4 border-blue-600 pl-4">
+            We focus on softness, trust, and loving customer care, making us a household favorite for families across all regions of Pakistan.
           </p>
         </div>
 
         {/* Mission Vision values bento right column */}
         <div className="md:col-span-5 space-y-6">
           {/* Mission */}
-          <div className="bg-white border border-brand-black/5 p-6 rounded-2xl shadow-xs">
+          <div className="bg-white border border-neutral-100 p-6 rounded-2xl shadow-xs">
             <div className="flex gap-4">
-              <div className="h-10 w-10 rounded-xl bg-brand-black text-white shrink-0 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-blue-600 text-white shrink-0 flex items-center justify-center">
                 <Award className="h-5.5 w-5.5" />
               </div>
               <div>
-                <h3 className="font-display text-sm font-black text-brand-black uppercase tracking-wider">Our Mission</h3>
-                <p className="text-xs text-zinc-500 mt-2 leading-relaxed">
-                  To provide high-quality home essentials, accessories, and useful products at affordable prices while maintaining excellent, heartwarming customer support.
+                <h3 className="font-display text-sm font-bold text-neutral-900 uppercase tracking-wider">Our Mission</h3>
+                <p className="text-xs text-neutral-500 mt-2 leading-relaxed">
+                  To supply premium organic baby outfits, accessories, and cute wear at direct factory pricing with exceptional customer satisfaction.
                 </p>
               </div>
             </div>
           </div>
 
           {/* Vision */}
-          <div className="bg-white border border-brand-black/5 p-6 rounded-2xl shadow-xs">
+          <div className="bg-white border border-neutral-100 p-6 rounded-2xl shadow-xs">
             <div className="flex gap-4">
-              <div className="h-10 w-10 rounded-xl bg-brand-gold text-white shrink-0 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-amber-500 text-white shrink-0 flex items-center justify-center">
                 <Gem className="h-5.5 w-5.5" />
               </div>
               <div>
-                <h3 className="font-display text-sm font-black text-brand-black uppercase tracking-wider">Our Vision</h3>
-                <p className="text-xs text-zinc-500 mt-2 leading-relaxed">
-                  To become Pakistan’s most trusted online household products and lifestyle accessories e-commerce brand backed by absolute trust.
+                <h3 className="font-display text-sm font-bold text-neutral-900 uppercase tracking-wider">Our Vision</h3>
+                <p className="text-xs text-neutral-500 mt-2 leading-relaxed">
+                  To grow as Pakistan's trusted household digital boutique for baby apparel, loved by moms and celebrated for quality.
                 </p>
               </div>
             </div>
@@ -691,13 +915,13 @@ export default function App() {
 
           {/* Dynamic statistics numbers */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-brand-lightgray p-4 rounded-xl border border-brand-black/5 text-center">
-              <span className="font-mono text-xl sm:text-2xl font-black text-brand-black">1000+</span>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase mt-1">Products Listed</p>
+            <div className="bg-neutral-50 p-4 rounded-xl border border-neutral-100 text-center">
+              <span className="font-mono text-xl sm:text-2xl font-black text-blue-600">500+</span>
+              <p className="text-[10px] text-neutral-500 font-bold uppercase mt-1">Stitch Patterns</p>
             </div>
-            <div className="bg-brand-lightgray p-4 rounded-xl border border-brand-black/5 text-center">
-              <span className="font-mono text-xl sm:text-2xl font-black text-brand-black">500+</span>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase mt-1">Happy Customers</p>
+            <div className="bg-neutral-50 p-4 rounded-xl border border-neutral-100 text-center">
+              <span className="font-mono text-xl sm:text-2xl font-black text-blue-600">10,000+</span>
+              <p className="text-[10px] text-neutral-500 font-bold uppercase mt-1">Happy Babies</p>
             </div>
           </div>
         </div>
@@ -705,18 +929,18 @@ export default function App() {
       </section>
 
       {/* 7. Standalone Customer Reviews Banner */}
-      <section className="bg-brand-charcoal py-16 text-white border-b border-brand-black/10">
+      <section className="bg-neutral-950 py-16 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="text-xs font-bold tracking-[0.2em] text-brand-gold uppercase font-mono">Verified Testimonials</span>
-          <h2 className="font-display text-2xl sm:text-3xl font-black mt-1 text-white">What Our Customers Say</h2>
+          <span className="text-xs font-bold tracking-[0.2em] text-blue-400 uppercase font-mono">Verified Testimonials</span>
+          <h2 className="font-display text-2xl sm:text-3xl font-black mt-1 text-white">What Happy Moms Say</h2>
           
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
             {REVIEWS.map((rev) => (
               <div key={rev.id} className="bg-zinc-900 border border-white/5 p-6 rounded-2xl text-left flex flex-col justify-between shadow-lg">
                 <div>
-                  <div className="flex text-brand-gold gap-0.5">
+                  <div className="flex text-amber-500 gap-0.5">
                     {Array.from({ length: rev.rating }).map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-current text-brand-gold" />
+                      <Star key={i} className="h-4 w-4 fill-current text-amber-500" />
                     ))}
                   </div>
                   <p className="text-zinc-300 text-xs italic mt-4 leading-relaxed font-medium">
@@ -738,120 +962,125 @@ export default function App() {
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-12 gap-12 items-start text-left">
         
         {/* left column coordinates address details info */}
-        <div className="md:col-span-5 bg-white border border-brand-black/5 rounded-2xl p-6 md:p-8 space-y-6">
-          <div className="flex items-center gap-2">
-            <Phone className="h-5.5 w-5.5 text-brand-black" />
-            <h3 className="font-display text-lg font-bold text-brand-black">Contact Desk</h3>
+        <div className="md:col-span-5 bg-white border border-neutral-200 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <Phone className="h-5.5 w-5.5 text-blue-600" />
+            <h3 className="font-display text-lg font-bold text-neutral-900 uppercase tracking-tight">Contact Desk</h3>
           </div>
           
-          <p className="text-xs text-zinc-500 leading-relaxed border-b border-brand-black/5 pb-4">
-            Have questions regarding wholesale bulk rates or custom table measurements? Get connected immediately on our Liaqutabad support cell line.
+          <p className="text-xs text-neutral-500 leading-relaxed border-b border-neutral-200 pb-4">
+            Have queries regarding matching sizing, gift packaging bundles, or custom orders? Reach out immediately to our Karachi assistance hotlines.
           </p>
 
           <div className="space-y-4">
-            <div className="flex items-start gap-3.5">
-              <MapPin className="h-5 w-5 text-brand-black shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3.5 text-left">
+              <MapPin className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-xs font-bold text-brand-black uppercase">Karachi Warehouse:</h4>
-                <p className="text-xs text-zinc-600 mt-1 whitespace-pre-line">Faizan Traders, Liaqutabad Karachi, Pakistan</p>
+                <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Boutique & Warehouse:</h4>
+                <p className="text-xs text-neutral-600 mt-1 whitespace-pre-line">The Sweet Baby Shop, Liaquatabad Town, Karachi, Pakistan</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3.5">
-              <Phone className="h-5 w-5 text-brand-black shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3.5 text-left">
+              <Phone className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-xs font-bold text-brand-black uppercase">Call Line support:</h4>
-                <a href="tel:+9203303511464" className="text-xs font-bold text-brand-gold hover:underline mt-1 block">
-                  +92 0330 3511464
+                <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Call Line Support:</h4>
+                <div className="space-y-1 mt-1 font-mono text-xs font-extrabold text-blue-600">
+                  <a href="tel:+9233426533873" className="hover:underline block">
+                    +92 334 26533873
+                  </a>
+                  <a href="tel:+923312187411" className="hover:underline block">
+                    +92 331 2187411
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3.5 text-left">
+              <Mail className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Official Email:</h4>
+                <a href="mailto:support@thesweetbabyshop.com" className="text-xs font-extrabold text-blue-600 hover:underline mt-1 block font-mono">
+                  support@thesweetbabyshop.com
                 </a>
               </div>
             </div>
 
-            <div className="flex items-start gap-3.5">
-              <Mail className="h-5 w-5 text-brand-black shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3.5 text-left">
+              <Clock className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-xs font-bold text-brand-black uppercase">Official Email:</h4>
-                <a href="mailto:info@faizantrader126.com" className="text-xs font-bold text-brand-gold hover:underline mt-1 block">
-                  info@faizantrader126.com
-                </a>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3.5">
-              <Clock className="h-5 w-5 text-brand-black shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-xs font-bold text-brand-black uppercase">Timings Open:</h4>
-                <p className="text-xs text-zinc-600 mt-1">Monday – Saturday | 10:00 AM - 09:00 PM</p>
+                <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Timings Open:</h4>
+                <p className="text-xs text-neutral-600 mt-1">Monday – Saturday | 10:00 AM - 09:30 PM</p>
               </div>
             </div>
           </div>
 
           {/* Simple neat map graphic mock */}
-          <div className="h-28 bg-brand-lightgray/80 border border-brand-black/5 rounded-xl overflow-hidden relative flex items-center justify-center p-3">
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]" />
+          <div className="h-28 bg-blue-50/40 border border-blue-100 rounded-xl overflow-hidden relative flex items-center justify-center p-3">
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#2563eb_1px,transparent_1px)] [background-size:16px_16px]" />
             <div className="relative text-center">
-              <MapPin className="h-5 w-5 text-brand-black mx-auto mb-1 animate-bounce" />
-              <span className="text-[10px] uppercase font-bold text-brand-black tracking-wider block">Liaqutabad Central Karachi</span>
-              <span className="text-[8px] text-zinc-500 font-mono mt-0.5 block">24.9080Â° N, 67.0423Â° E</span>
+              <MapPin className="h-5 w-5 text-blue-600 mx-auto mb-1 animate-bounce" />
+              <span className="text-[10px] uppercase font-bold text-neutral-900 tracking-wider block">Liaquatabad Karachi</span>
+              <span className="text-[8px] text-neutral-500 font-mono mt-0.5 block">24.9080° N, 67.0423° E</span>
             </div>
           </div>
         </div>
 
         {/* right column enquiry forms */}
-        <div className="md:col-span-7 bg-white border border-brand-black/5 rounded-2xl p-6 md:p-8">
-          <h3 className="font-display text-lg font-bold text-brand-black">Send Us An Direct Inquiry</h3>
-          <p className="text-xs text-zinc-500 mt-1">Submit your details and order query. Our agent will verify items in stock and reply on WhatsApp.</p>
+        <div className="md:col-span-7 bg-white border border-neutral-200 rounded-2xl p-6 md:p-8 shadow-sm">
+          <h3 className="font-display text-lg font-bold text-neutral-900 uppercase tracking-tight">Send Us A Direct Query</h3>
+          <p className="text-xs text-neutral-500 mt-1">Submit your baby specifications and clothing requests. Our staff will check live stock and respond on WhatsApp.</p>
           
           <form onSubmit={handleInquirySubmit} className="mt-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
               <div>
-                <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">Your Full Name: *</label>
+                <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-wider font-mono">Your Full Name: *</label>
                 <input 
                   type="text" 
                   value={inquiryName}
                   onChange={(e) => setInquiryName(e.target.value)}
                   placeholder="Enter full name"
                   required
-                  className="w-full mt-1.5 bg-brand-lightgray border border-brand-black/10 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-brand-black focus:outline-hidden"
+                  className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-blue-600 focus:outline-hidden font-bold text-neutral-900"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">WhatsApp Mobile No: *</label>
+                <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-wider font-mono">WhatsApp Mobile No: *</label>
                 <input 
                   type="tel" 
                   value={inquiryPhone}
                   onChange={(e) => setInquiryPhone(e.target.value)}
-                  placeholder="e.g. 03303511464"
+                  placeholder="e.g. 033426533873"
                   required
-                  className="w-full mt-1.5 bg-brand-lightgray border border-brand-black/10 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-brand-black focus:outline-hidden font-mono"
+                  className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-blue-600 focus:outline-hidden font-mono font-bold text-neutral-900"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">Your Inquiry / Message details: *</label>
+            <div className="text-left">
+              <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-wider font-mono">Your Inquiry / Sizing details: *</label>
               <textarea 
                 rows={3}
                 value={inquiryMessage}
                 onChange={(e) => setInquiryMessage(e.target.value)}
-                placeholder="Describe your household requests or product sizing requirements details..."
+                placeholder="Describe baby height/weight or custom garment combinations required..."
                 required
-                className="w-full mt-1.5 bg-brand-lightgray border border-brand-black/10 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-brand-black focus:outline-hidden"
+                className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-blue-600 focus:outline-hidden font-bold text-neutral-900"
               />
             </div>
 
             <button
               type="submit"
               disabled={inquirySubmitted}
-              className="w-full bg-brand-black hover:bg-zinc-800 text-white font-bold text-xs tracking-wider uppercase py-3.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wider uppercase py-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               {inquirySubmitted ? (
                 <>Loading...</>
               ) : (
                 <>
                   <Send className="h-4 w-4" />
-                  <span>Transmit Inquiry Document</span>
+                  <span>Transmit Inquiry</span>
                 </>
               )}
             </button>
@@ -861,25 +1090,25 @@ export default function App() {
       </section>
 
       {/* 9. Brand footer area panel */}
-      <footer className="mt-auto bg-brand-black text-white pt-16 pb-12 border-t border-white/5 text-left">
+      <footer className="mt-auto bg-neutral-900 text-white pt-16 pb-12 text-left">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-10">
           
           {/* Brand details and logo */}
           <div className="md:col-span-5 space-y-4">
-            <div className="bg-white p-3.5 rounded-2xl max-w-[12rem] border border-white/10 flex justify-center items-center">
+            <div className="bg-white p-3.5 rounded-2xl max-w-[14rem] flex justify-center items-center shadow-md">
               <Logo size="sm" showPhone={false} className="scale-95" />
             </div>
             <p className="text-zinc-400 text-xs leading-relaxed max-w-sm pt-2">
-              Faizan Traders is Pakistan’s growing retail and wholesale hub, specializing in modern stretch sofa slipcovers, waterproof dining table covers, culinary kitchenware, appliances, cables, Power banks, and everyday life-hack gadgets.
+              The Sweet Baby Shop is Pakistan's premier digital storefront for lovable, premium combed-cotton apparel, starter sets, playful kids clothing, and cute accessories crafted for ultimate childhood comfort.
             </p>
             <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest pt-2">
-              ⚡ www.faizantraders.com • Liaqutabad Karachi
+              👶 Premium Softness • Liaquatabad Karachi
             </div>
           </div>
 
           {/* Links Quick column */}
           <div className="md:col-span-3 space-y-4">
-            <h4 className="font-display text-xs font-black uppercase tracking-wider text-brand-gold">Catalogs Collections</h4>
+            <h4 className="font-display text-xs font-black uppercase tracking-wider text-blue-400">Shop Collections</h4>
             <div className="flex flex-col gap-2 text-zinc-400 text-xs">
               {CATEGORIES.slice(0, 4).map((c) => (
                 <button 
@@ -890,7 +1119,7 @@ export default function App() {
                   }}
                   className="hover:text-white transition-colors text-left font-semibold cursor-pointer"
                 >
-                  Shop Custom {c.name.split(' & ')[0]}
+                  Shop Cute {c.name.split(' & ')[0]}
                 </button>
               ))}
             </div>
@@ -901,16 +1130,16 @@ export default function App() {
             <h4 className="font-display text-xs font-black uppercase tracking-wider text-white">Trust Badges</h4>
             <div className="space-y-3 pt-1 text-zinc-400 font-sans">
               <p className="flex items-center gap-2.5">
-                <Truck className="h-4.5 w-4.5 shrink-0 text-emerald-500" />
+                <Truck className="h-4.5 w-4.5 shrink-0 text-blue-400" />
                 <span>Nationwide Pakistan Delivery COD</span>
               </p>
               <p className="flex items-center gap-2.5">
-                <ShieldCheck className="h-4.5 w-4.5 shrink-0 text-brand-gold" />
-                <span>Verified Client Satisfaction Guarantee</span>
+                <ShieldCheck className="h-4.5 w-4.5 shrink-0 text-amber-500" />
+                <span>Non-Allergenic 100% Baby Cotton Verified</span>
               </p>
               <p className="flex items-center gap-2.5">
-                <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-emerald-500" />
-                <span>100% Secure Package Deliveries</span>
+                <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-blue-400" />
+                <span>Guaranteed Direct Factory Rates</span>
               </p>
             </div>
           </div>
@@ -918,13 +1147,13 @@ export default function App() {
         </div>
 
         {/* Copy bar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-white/5 mt-12 pt-8 space-y-4 text-zinc-500 text-[11px] font-mono text-center sm:text-left">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-neutral-850 mt-12 pt-8 space-y-4 text-zinc-500 text-[11px] font-mono text-center sm:text-left">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <span>&copy; {new Date().getFullYear()} Faizan Traders. All Rights Reserved. Development version.</span>
+            <span>&copy; {new Date().getFullYear()} The Sweet Baby Shop. All Rights Reserved.</span>
             <div className="flex gap-4">
-              <a href="#" className="hover:text-white transition-colors">Privacy Shield</a>
+              <a href="#" className="hover:text-white transition-colors">Safety Standard</a>
               <span>•</span>
-              <a href="#" className="hover:text-white transition-colors">Customer terms of use</a>
+              <a href="#" className="hover:text-white transition-colors">Terms of Love</a>
             </div>
           </div>
 
@@ -932,11 +1161,11 @@ export default function App() {
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-left">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
                 <span className="text-white font-bold uppercase tracking-wider text-[10px]">Database Connection Status</span>
               </div>
               <p className="text-zinc-400 text-[10px]">
-                Connected to project <strong className="text-white">vwoqpxljyxqacadnpgfk</strong> | Owner Node <strong className="text-white">faizantrader126@gmail.com</strong>
+                Connected to project <strong className="text-white">vwoqpxljyxqacadnpgfk</strong> | Owner Node <strong className="text-white">thesweetbabyshop@gmail.com</strong>
               </p>
               <div className="text-[9px] text-zinc-500 overflow-hidden text-ellipsis whitespace-nowrap max-w-[280px] sm:max-w-md">
                 Publishable Key: sb_publishable_8imO92Hxr2KGilgnAbNsVw_Dho4Vc9q
@@ -945,7 +1174,7 @@ export default function App() {
             
             <button
               onClick={() => setIsManagerOpen(true)}
-              className="px-4 py-2 bg-brand-gold text-brand-black text-[10px] font-extrabold uppercase rounded-xl hover:bg-yellow-650 transition-colors shrink-0 tracking-wide cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 bg-blue-500 text-black text-[10px] font-extrabold uppercase rounded-xl hover:bg-blue-600 transition-colors shrink-0 tracking-wide cursor-pointer flex items-center gap-1.5"
             >
               🔐 Admin Panel & CRM Access
             </button>
@@ -955,7 +1184,7 @@ export default function App() {
 
       {/* 10. Sticky WhatsApp Floating badge indicator clickable bottom right */}
       <a
-        href="https://wa.me/9203303511464?text=Assalam-o-Alaikum%20Faizan%20Traders!%20I%20am%20visiting%20your%20website%20and%20I%20need%20assistance%20on%20premium%20home%20products."
+        href="https://wa.me/9233426533873?text=Assalam-o-Alaikum%20The%20Sweet%20Baby%20Shop!%20I%20am%20visiting%20your%20website%20and%20I%20need%20assistance%20on%20premium%20baby%20products."
         target="_blank"
         referrerPolicy="no-referrer"
         className="fixed bottom-6 right-6 z-40 flex items-center justify-center rounded-full bg-[#25d366] p-4 text-white shadow-2xl hover:scale-105 transition-transform group"

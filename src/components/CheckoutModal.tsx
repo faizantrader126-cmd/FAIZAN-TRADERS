@@ -166,7 +166,7 @@ export default function CheckoutModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-brand-black/60 backdrop-blur-xs"
+        className="absolute inset-0 bg-black/60 backdrop-blur-xs"
       />
 
       {/* Main container */}
@@ -174,12 +174,12 @@ export default function CheckoutModal({
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
-        className="relative z-10 grid h-full max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-2xl border border-brand-black/10 bg-white shadow-2xl md:grid-cols-12"
+        className="relative z-10 grid h-full max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl md:grid-cols-12"
       >
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 rounded-full border border-brand-black/10 bg-white/90 p-2 text-brand-black hover:bg-brand-black hover:text-white transition-colors cursor-pointer"
+          className="absolute top-4 right-4 z-20 rounded-full border border-neutral-200 bg-white/90 p-2 text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
         >
           <X className="h-4.5 w-4.5" />
         </button>
@@ -188,15 +188,15 @@ export default function CheckoutModal({
         <div className="md:col-span-7 overflow-y-auto p-6 md:p-8 flex flex-col justify-between max-h-[50vh] md:max-h-full">
           <div>
             <div className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-brand-black" />
-              <h2 className="font-display text-xl font-bold text-brand-black">Shipping & Order Form</h2>
+              <MapPin className="h-5 w-5 text-black" />
+              <h2 className="font-display text-xl font-bold text-black uppercase tracking-tight">Shipping & Order Form</h2>
             </div>
-            <p className="text-xs text-brand-black/60 mt-1">Please enter your correct delivery address details to prevent delay in custom shipments.</p>
+            <p className="text-xs text-neutral-500 mt-1">Please enter your correct delivery address details to prevent delay in custom shipments.</p>
             
             <form id="checkout-form" className="mt-6 space-y-4 text-left">
               {/* Full Name */}
               <div>
-                <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">Full Name: *</label>
+                <label className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Full Name: *</label>
                 <input 
                   type="text"
                   name="name"
@@ -204,14 +204,14 @@ export default function CheckoutModal({
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full mt-1.5 bg-brand-lightgray/50 border border-brand-black/10 rounded-lg px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-brand-black focus:outline-hidden"
+                  className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-bold text-black"
                 />
               </div>
 
               {/* Telephone contacts */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">Call Contact Mobile: *</label>
+                  <label className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Call Contact Mobile: *</label>
                   <input 
                     type="tel"
                     name="phone"
@@ -219,25 +219,25 @@ export default function CheckoutModal({
                     value={formData.phone}
                     onChange={handleInputChange}
                     required
-                    className="w-full mt-1.5 bg-brand-lightgray/50 border border-brand-black/10 rounded-lg px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-brand-black focus:outline-hidden font-mono"
+                    className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-mono font-bold text-black"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">WhatsApp Number (Optional):</label>
+                  <label className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">WhatsApp Number (Optional):</label>
                   <input 
                     type="tel"
                     name="whatsapp"
                     placeholder="Same as call mobile if empty"
                     value={formData.whatsapp}
                     onChange={handleInputChange}
-                    className="w-full mt-1.5 bg-brand-lightgray/50 border border-brand-black/10 rounded-lg px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-brand-black focus:outline-hidden font-mono"
+                    className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-mono font-bold text-black"
                   />
                 </div>
               </div>
 
               {/* Home Address info */}
               <div>
-                <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">Full Home & Street Address: *</label>
+                <label className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Full Home & Street Address: *</label>
                 <input 
                   type="text"
                   name="address"
@@ -245,19 +245,19 @@ export default function CheckoutModal({
                   value={formData.address}
                   onChange={handleInputChange}
                   required
-                  className="w-full mt-1.5 bg-brand-lightgray/50 border border-brand-black/10 rounded-lg px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-brand-black focus:outline-hidden"
+                  className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-bold text-black"
                 />
               </div>
 
               {/* Cities drop selector */}
               <div>
-                <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">Select City: *</label>
+                <label className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Select City: *</label>
                 <select
                   name="city"
                   value={formData.city}
                   onChange={handleInputChange}
                   required
-                  className="w-full mt-1.5 bg-brand-lightgray/50 border border-brand-black/10 rounded-lg px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-brand-black focus:outline-hidden font-medium"
+                  className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-bold text-black"
                 >
                   {PAKISTAN_CITIES.map((c) => (
                     <option key={c} value={c}>
@@ -269,26 +269,26 @@ export default function CheckoutModal({
 
               {/* Custom order notes */}
               <div>
-                <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">Special Order / Custom Size Notes (Optional):</label>
+                <label className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Special Order / Custom Size Notes (Optional):</label>
                 <textarea 
                   name="notes"
                   rows={2}
                   placeholder="Write color requirements, table dimensions in inches, or delivery guidelines..."
                   value={formData.notes}
                   onChange={handleInputChange}
-                  className="w-full mt-1.5 bg-brand-lightgray/50 border border-brand-black/10 rounded-lg px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-brand-black focus:outline-hidden"
+                  className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-bold text-black"
                 />
               </div>
             </form>
           </div>
 
           {/* Secure Double Submits buttons panel */}
-          <div className="mt-6 border-t border-brand-black/5 pt-5 space-y-2.5">
+          <div className="mt-6 border-t border-neutral-200 pt-5 space-y-2.5">
             <button
               onClick={handleStandardCODSubmit}
               type="submit"
               disabled={isSubmitting || !formData.name || !formData.phone || !formData.address}
-              className="w-full py-4 px-6 rounded-xl font-bold text-sm tracking-wide bg-brand-black hover:bg-zinc-800 text-white transition-all duration-200 flex items-center justify-center gap-2 shadow-md disabled:opacity-50 cursor-pointer"
+              className="w-full py-4 px-6 rounded-xl font-bold text-sm tracking-wide bg-black hover:bg-neutral-900 text-white transition-all duration-200 flex items-center justify-center gap-2 shadow-md disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting ? (
                 <>
@@ -305,7 +305,7 @@ export default function CheckoutModal({
 
             <button
               onClick={handleWhatsAppSubmit}
-              className="w-full py-4 px-6 rounded-xl font-bold text-sm tracking-wide bg-brand-brand-whatsapp bg-[#25d366] hover:bg-[#20ba5a] text-white transition-all duration-200 flex items-center justify-center gap-2 shadow-md disabled:opacity-50 cursor-pointer"
+              className="w-full py-4 px-6 rounded-xl font-bold text-sm tracking-wide bg-[#25d366] hover:bg-[#1ebd54] text-white transition-all duration-200 flex items-center justify-center gap-2 shadow-md disabled:opacity-50 cursor-pointer"
             >
               <MessageSquare className="h-4.5 w-4.5 fill-current" />
               Direct WhatsApp Checkout Invoice Now
@@ -314,25 +314,25 @@ export default function CheckoutModal({
         </div>
 
         {/* Column Right: Billing invoice breakdown */}
-        <div className="md:col-span-5 bg-brand-lightgray p-6 md:p-8 flex flex-col justify-between overflow-y-auto max-h-[42vh] md:max-h-full">
+        <div className="md:col-span-5 bg-neutral-50 p-6 md:p-8 flex flex-col justify-between overflow-y-auto max-h-[42vh] md:max-h-full">
           <div>
-            <h3 className="font-display text-sm font-bold text-brand-black uppercase tracking-wider border-b border-brand-black/10 pb-3">Order Invoice</h3>
+            <h3 className="font-display text-sm font-bold text-black uppercase tracking-wider border-b border-neutral-200 pb-3">Order Invoice</h3>
             
             {/* Scrollable products summary */}
             <div className="mt-4 space-y-3 max-h-[22rem] overflow-y-auto pr-1">
               {cartItems.map((item, id) => (
                 <div key={id} className="flex gap-3 text-left">
-                  <div className="h-11 w-11 shrink-0 overflow-hidden rounded-md border border-brand-black/5 bg-white">
+                  <div className="h-11 w-11 shrink-0 overflow-hidden rounded-md border border-neutral-100 bg-white">
                     <img src={item.product?.image || ''} className="h-full w-full object-cover" alt={item.product?.name || 'Product'} />
                   </div>
                   <div className="flex-1 flex flex-col justify-center">
-                    <h5 className="text-[11px] font-bold text-brand-black leading-tight line-clamp-1">{item.product?.name || 'Product'}</h5>
-                    <div className="text-[9px] text-brand-black/50 font-mono mt-0.5">
+                    <h5 className="text-[11px] font-bold text-black leading-tight line-clamp-1">{item.product?.name || 'Product'}</h5>
+                    <div className="text-[9px] text-neutral-500 font-mono mt-0.5">
                       {item.quantity} x Rs. {getItemPrice(item).toLocaleString()} 
                       {item.selectedSize && ` | Size: ${item.selectedSize}`}
                     </div>
                   </div>
-                  <span className="font-mono text-xs font-bold text-brand-black flex items-center">
+                  <span className="font-mono text-xs font-bold text-black flex items-center">
                     Rs. {(getItemPrice(item) * item.quantity).toLocaleString()}
                   </span>
                 </div>
@@ -340,34 +340,34 @@ export default function CheckoutModal({
             </div>
           </div>
 
-          <div className="mt-6 border-t border-brand-black/10 pt-5 text-left">
+          <div className="mt-6 border-t border-neutral-200 pt-5 text-left">
             {/* Invoice lines */}
             <div className="space-y-2.5 text-xs">
-              <div className="flex justify-between text-brand-black/60">
+              <div className="flex justify-between text-neutral-500">
                 <span>Cart Subtotal:</span>
-                <span className="font-mono font-medium">Rs. {subtotal.toLocaleString()}</span>
+                <span className="font-mono font-bold text-black">Rs. {subtotal.toLocaleString()}</span>
               </div>
               {discountAmount > 0 && (
-                <div className="flex justify-between text-emerald-700">
+                <div className="flex justify-between text-emerald-700 font-bold">
                   <span>Promo Discount:</span>
-                  <span className="font-mono font-medium">-Rs. {discountAmount.toLocaleString()}</span>
+                  <span className="font-mono font-bold">-Rs. {discountAmount.toLocaleString()}</span>
                 </div>
               )}
-              <div className="flex justify-between text-brand-black/60">
+              <div className="flex justify-between text-neutral-500">
                 <span>Shipping Expenses:</span>
-                <span className="font-mono font-medium">{shippingCost === 0 ? 'FREE' : `Rs. ${shippingCost}`}</span>
+                <span className="font-mono font-bold text-black">{shippingCost === 0 ? 'FREE' : `Rs. ${shippingCost}`}</span>
               </div>
-              <div className="flex justify-between font-display text-lg font-black text-brand-black border-t border-brand-black/10 pt-3.5">
+              <div className="flex justify-between font-display text-base font-bold text-black border-t border-neutral-200 pt-3.5">
                 <span>Grand Total:</span>
-                <span className="font-mono">Rs. {totalAmount.toLocaleString()}</span>
+                <span className="font-mono font-black">Rs. {totalAmount.toLocaleString()}</span>
               </div>
             </div>
 
             {/* Safety lock alert tags */}
-            <div className="mt-6 bg-white/60 border border-brand-black/5 p-3 rounded-lg flex items-start gap-2.5">
-              <ShieldCheck className="h-4.5 w-4.5 text-brand-gold shrink-0 mt-0.5" />
-              <p className="text-[10px] text-brand-black/60 leading-relaxed">
-                <strong>Pay after Verification:</strong> Under Pakistan Cod policy, you pay cash to the courier agent only absolute packages are delivered directly to your doorstep.
+            <div className="mt-6 bg-white border border-neutral-200 p-3 rounded-lg flex items-start gap-2.5 shadow-xs">
+              <ShieldCheck className="h-4.5 w-4.5 text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-[10px] text-neutral-500 leading-relaxed">
+                <strong>Pay after Verification:</strong> Under Pakistan COD policy, you pay cash to the courier agent only after packages are delivered directly to your doorstep.
               </p>
             </div>
           </div>

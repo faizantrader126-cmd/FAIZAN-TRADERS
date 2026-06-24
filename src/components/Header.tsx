@@ -31,31 +31,6 @@ export default function Header({
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-neutral-200">
-      {/* Top Bar Announcement - Minimog Style */}
-      <div className="bg-black text-white text-[10px] sm:text-xs font-mono font-medium tracking-wider py-2.5 px-4 flex flex-col sm:flex-row justify-between items-center gap-1.5 border-b border-neutral-900">
-        <div className="flex items-center gap-2">
-          <Truck className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
-          <span className="uppercase tracking-widest font-bold text-neutral-200">FREE NATIONWIDE SHIPPING ON ORDERS ABOVE RS. 2,500</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <a href="tel:+9203303511464" className="hover:text-amber-500 transition-colors flex items-center gap-1">
-            <PhoneCall className="h-3 w-3" />
-            <span>0330 3511464</span>
-          </a>
-          <span className="opacity-20">|</span>
-          <a href="https://wa.me/9203303511464" target="_blank" referrerPolicy="no-referrer" className="hover:text-[#25d366] transition-colors flex items-center gap-1 font-bold">
-            <MessageSquare className="h-3 w-3 fill-current text-[#25d366]" />
-            <span>ORDER ON WHATSAPP</span>
-          </a>
-          <span className="opacity-20 hidden sm:inline">|</span>
-          {/* Symmetrical localized widget for Pakistan standard */}
-          <div className="hidden sm:flex items-center gap-1 text-[10px] font-bold text-neutral-300">
-            <span>🇵🇰</span>
-            <span>PKR (Rs.)</span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Core Header bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
         {/* Mobile menu trigger */}
@@ -78,7 +53,7 @@ export default function Header({
           </span>
           <input 
             type="text"
-            placeholder="Search premium sofa covers, gadgets, kitchenware, accessories..."
+            placeholder="Search for products, brands and more..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full bg-neutral-50 border border-neutral-200 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:bg-white focus:ring-1 focus:ring-black focus:outline-hidden text-black font-semibold transition-all"
@@ -158,17 +133,17 @@ export default function Header({
       </div>
 
       {/* Mobile search list block */}
-      <div className="px-4 py-3 md:hidden border-t border-brand-black/5 bg-brand-lightgray/30">
+      <div className="px-4 py-3 md:hidden border-t border-neutral-100 bg-neutral-50/50">
         <div className="relative">
-          <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-brand-black/40">
+          <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-400">
             <Search className="h-4 w-4" />
           </span>
           <input 
             type="text"
-            placeholder="Search 1000+ products..."
+            placeholder="Search for products, brands and more..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-white border border-brand-black/10 rounded-xl pl-9 pr-4 py-2 text-xs focus:ring-1 focus:ring-brand-black focus:outline-hidden"
+            className="w-full bg-white border border-neutral-200 rounded-xl pl-9 pr-4 py-2 text-xs focus:ring-1 focus:ring-black focus:outline-hidden text-black font-semibold"
           />
         </div>
       </div>
@@ -176,26 +151,26 @@ export default function Header({
       {/* Mobile menu panel overlay drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-30 flex">
-          <div onClick={() => setMobileMenuOpen(false)} className="absolute inset-0 bg-brand-black/40 backdrop-blur-xs" />
+          <div onClick={() => setMobileMenuOpen(false)} className="absolute inset-0 bg-black/40 backdrop-blur-xs" />
           <div className="relative w-4/5 max-w-xs bg-white h-full shadow-2xl flex flex-col justify-between p-6">
             <div className="space-y-6 text-left">
-              <div className="flex items-center justify-between border-b border-brand-black/5 pb-4">
+              <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
                 <Logo size="sm" showPhone={false} className="origin-left" />
                 <button onClick={() => setMobileMenuOpen(false)}>
-                  <X className="h-5 w-5 text-brand-black" />
+                  <X className="h-5 w-5 text-black" />
                 </button>
               </div>
 
               <div>
-                <h4 className="text-[10px] font-bold text-brand-black/40 uppercase tracking-[0.15em] mb-3">Shop Categories</h4>
-                <div className="flex flex-col gap-2">
+                <h4 className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.15em] mb-3">Shop Categories</h4>
+                <div className="flex flex-col gap-1.5">
                   <button
                     onClick={() => {
                       onCategorySelect('all');
                       setMobileMenuOpen(false);
                     }}
-                    className={`text-xs font-semibold py-2.5 px-3 rounded-lg text-left transition-colors ${
-                      activeCategory === 'all' ? 'bg-brand-black text-white' : 'hover:bg-brand-lightgray text-brand-black/80'
+                    className={`text-xs font-bold py-2.5 px-3 rounded-lg text-left transition-colors ${
+                      activeCategory === 'all' ? 'bg-black text-white' : 'hover:bg-neutral-100 text-neutral-800'
                     }`}
                   >
                     All Collections
@@ -207,8 +182,8 @@ export default function Header({
                         onCategorySelect(c.id);
                         setMobileMenuOpen(false);
                       }}
-                      className={`text-xs font-semibold py-2.5 px-3 rounded-lg text-left transition-colors ${
-                        activeCategory === c.id ? 'bg-brand-black text-white' : 'hover:bg-brand-lightgray text-brand-black/80'
+                      className={`text-xs font-bold py-2.5 px-3 rounded-lg text-left transition-colors ${
+                        activeCategory === c.id ? 'bg-black text-white' : 'hover:bg-neutral-100 text-neutral-800'
                       }`}
                     >
                       {c.name}
@@ -218,27 +193,27 @@ export default function Header({
               </div>
             </div>
 
-            <div className="border-t border-brand-black/10 pt-4 text-left space-y-3">
+            <div className="border-t border-neutral-100 pt-4 text-left space-y-3">
               {/* Owner Portal Shortcut */}
               <button
                 onClick={() => {
                   onManagerClick();
                   setMobileMenuOpen(false);
                 }}
-                className="w-full bg-[#ca8a04] hover:bg-yellow-600 text-brand-black font-extrabold text-xs py-2.5 rounded-lg text-center block cursor-pointer"
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs py-2.5 rounded-lg text-center block cursor-pointer"
               >
                 Owner Panel: Manage Items ⚙️
               </button>
 
               <div className="flex items-center gap-3">
-                <a href="tel:+9203303511464" className="w-full bg-brand-black text-white py-2.5 rounded-lg text-xs font-bold text-center block">
+                <a href="tel:+9203312187411" className="w-full bg-black text-white py-2.5 rounded-lg text-xs font-bold text-center block">
                   Call Support
                 </a>
-                <a href="https://wa.me/9203303511464" className="w-full bg-[#25d366] text-white py-2.5 rounded-lg text-xs font-bold text-center block">
+                <a href="https://wa.me/92033426533873" className="w-full bg-[#25d366] text-white py-2.5 rounded-lg text-xs font-bold text-center block">
                   WhatsApp Support
                 </a>
               </div>
-              <p className="text-[10px] text-zinc-400 mt-3 text-center">Faizan Traders - Liaqutabad Karachi</p>
+              <p className="text-[10px] text-zinc-400 mt-3 text-center">The Sweet Baby Shop - Premium Clothing</p>
             </div>
           </div>
         </div>

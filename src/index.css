@@ -6,13 +6,13 @@
   --font-display: "Space Grotesk", "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --color-brand-black: #0c0d0e;
-  --color-brand-charcoal: #181a1c;
-  --color-brand-offwhite: #f9f9fb;
-  --color-brand-lightgray: #f3f4f6;
+  --color-brand-black: #000000;
+  --color-brand-charcoal: #121212;
+  --color-brand-offwhite: #fcfcfd;
+  --color-brand-lightgray: #f5f5f7;
   --color-brand-whatsapp: #25d366;
-  --color-brand-whatsapp-hover: #20ba5a;
-  --color-brand-gold: #d97706;
+  --color-brand-whatsapp-hover: #1ebd54;
+  --color-brand-gold: #ca8a04;
 }
 
 @layer base {
