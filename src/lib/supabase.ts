@@ -1,8 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Retrieve values from environment or use user-provided defaults
-const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || 'https://vwoqpxljyxqacadnpgfk.supabase.co';
-const supabaseKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 'sb_publishable_8imO92Hxr2KGilgnAbNsVw_Dho4Vc9q';
+// Retrieve values from environment or use user-provided defaults with robust URL validation
+const getSupabaseConfig = () => {
+  const defaultUrl = 'https://vwoqpxljyxqacadnpgfk.supabase.co';
+  const defaultKey = 'sb_publishable_8imO92Hxr2KGilgnAbNsVw_Dho4Vc9q';
+
+  const envUrl = (import.meta as any).env?.VITE_SUPABASE_URL;
+  const envKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
+
+  const isValidUrl = (str: any): boolean => {
+    if (typeof str !== 'string') return false;
+    const trimmed = str.trim();
+    return trimmed.startsWith('http://') || trimmed.startsWith('https://');
+  };
+
+  const finalUrl = isValidUrl(envUrl) ? envUrl.trim() : defaultUrl;
+  const finalKey = (typeof envKey === 'string' && envKey.trim() && !envKey.includes('placeholder')) ? envKey.trim() : defaultKey;
+
+  return { url: finalUrl, key: finalKey };
+};
+
+const { url: supabaseUrl, key: supabaseKey } = getSupabaseConfig();
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
