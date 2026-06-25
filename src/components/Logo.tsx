@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import logoImg from '../assets/images/logo.jpeg';
 
 interface LogoProps {
@@ -8,12 +8,27 @@ interface LogoProps {
 }
 
 export default function Logo({ className = '', showPhone = false, size = 'md' }: LogoProps) {
+  const [logoSrc, setLogoSrc] = useState<string>(() => {
+    return localStorage.getItem('custom_store_logo') || logoImg;
+  });
+
+  useEffect(() => {
+    const handleLogoChange = () => {
+      setLogoSrc(localStorage.getItem('custom_store_logo') || logoImg);
+    };
+
+    window.addEventListener('store_logo_changed', handleLogoChange);
+    return () => {
+      window.removeEventListener('store_logo_changed', handleLogoChange);
+    };
+  }, []);
+
   const heightClass = size === 'sm' ? 'h-8 sm:h-10' : size === 'lg' ? 'h-20 sm:h-24' : 'h-14 sm:h-16';
 
   return (
     <div className={`flex flex-col items-center sm:items-start select-none ${className}`}>
       <img 
-        src={logoImg} 
+        src={logoSrc} 
         alt="The Sweet Baby Shop Logo" 
         className={`${heightClass} object-contain rounded-md`}
         referrerPolicy="no-referrer"

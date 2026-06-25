@@ -145,7 +145,11 @@ export default function ProductManagerModal({ products, onClose, onSaveProducts,
   const [signupPass, setSignupPass] = useState('');
 
   // Primary active Admin tab view
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'slides' | 'orders' | 'inquiries'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'slides' | 'orders' | 'inquiries' | 'settings'>('dashboard');
+
+  const [customLogo, setCustomLogo] = useState<string>(() => {
+    return localStorage.getItem('custom_store_logo') || '';
+  });
 
   // Supabase live records
   const [ordersDb, setOrdersDb] = useState<any[]>([]);
@@ -877,6 +881,18 @@ export default function ProductManagerModal({ products, onClose, onSaveProducts,
               </span>
             )}
           </button>
+
+          <button
+            onClick={() => { setActiveTab('settings'); setCurrentView('list'); }}
+            className={`px-3 py-2.5 text-xs font-semibold tracking-wider flex items-center gap-1.5 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === 'settings' && !isFormActive && currentView !== 'slides'
+                ? 'border-brand-gold text-white font-extrabold' 
+                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Layers className="h-4 w-4 text-orange-400" />
+            <span>⚙️ Logo Settings</span>
+          </button>
         </div>
 
         {/* Dynamic Action layout content body */}
@@ -1480,6 +1496,114 @@ CREATE TABLE IF NOT EXISTS orders (
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* VIEW: LOGO SETTINGS */}
+          {currentView === 'list' && activeTab === 'settings' && !isFormActive && (
+            <div className="bg-white border border-brand-black/5 rounded-2xl p-6 shadow-xs max-w-2xl mx-auto space-y-6">
+              <div className="border-b border-brand-black/5 pb-4">
+                <h3 className="font-display font-extrabold text-sm uppercase tracking-wider text-brand-black">🖼️ Live Custom Logo Manager</h3>
+                <p className="text-[10px] text-zinc-500 font-medium">Upload or specify a custom branding logo for your entire store. Updates in real-time across all views.</p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono block">Current Logo Preview:</label>
+                  <div className="mt-2 p-4 bg-neutral-50 rounded-xl border border-neutral-200 flex justify-center items-center h-28">
+                    <img
+                      src={customLogo || '/src/assets/images/logo.jpeg'}
+                      alt="Brand Logo"
+                      className="max-h-full max-w-full object-contain rounded-md"
+                      onError={(e) => {
+                        e.currentTarget.src = '/src/assets/images/logo.jpeg';
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono block">Option 1: Paste Logo Image URL</label>
+                  <input
+                    type="url"
+                    value={customLogo.startsWith('data:') ? '' : customLogo}
+                    onChange={(e) => setCustomLogo(e.target.value.trim())}
+                    placeholder="https://example.com/logo.png"
+                    className="w-full bg-white border border-brand-black/10 rounded-xl px-4 py-2.5 text-xs font-mono focus:outline-hidden"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono block">Option 2: Select / Upload Local Photo</label>
+                  <input
+                    type="file"
+                    id="logo-file-uploader"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      compressImage(file, 400, 200, 0.8)
+                        .then((compressed) => {
+                          setCustomLogo(compressed);
+                        })
+                        .catch((err) => {
+                          console.error('Logo compression error:', err);
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            if (event.target?.result) {
+                              setCustomLogo(event.target.result as string);
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        });
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('logo-file-uploader')?.click()}
+                    className="w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-brand-black/25 bg-white p-3 text-[11px] font-bold text-brand-black hover:bg-brand-lightgray hover:border-brand-black transition-all cursor-pointer"
+                  >
+                    <Upload className="h-4 w-4 text-brand-gold shrink-0" />
+                    <span>Upload Logo File 📁</span>
+                  </button>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-brand-black/5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const confirmReset = window.confirm('Are you sure you want to restore the original default logo?');
+                      if (confirmReset) {
+                        localStorage.removeItem('custom_store_logo');
+                        setCustomLogo('');
+                        window.dispatchEvent(new Event('store_logo_changed'));
+                        alert('Restored default logo successfully! ✨');
+                      }
+                    }}
+                    className="px-4 py-2.5 rounded-xl border border-red-200 text-red-750 hover:bg-red-50 text-xs font-bold uppercase cursor-pointer tracking-wider"
+                  >
+                    Reset Default Logo 🔄
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (customLogo) {
+                        localStorage.setItem('custom_store_logo', customLogo);
+                      } else {
+                        localStorage.removeItem('custom_store_logo');
+                      }
+                      window.dispatchEvent(new Event('store_logo_changed'));
+                      alert('Custom Store Logo successfully updated live! ✨');
+                    }}
+                    className="flex-1 bg-brand-black hover:bg-zinc-800 text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                  >
+                    <Save className="h-4 w-4 text-brand-gold" />
+                    <span>Save & Apply Custom Logo</span>
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

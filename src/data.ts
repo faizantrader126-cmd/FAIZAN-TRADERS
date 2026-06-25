@@ -10,11 +10,11 @@ export const CATEGORIES = [
 ];
 
 export const COLLECTIONS = [
-  { id: 'bodysuits', name: 'Bodysuits', image: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=300' },
-  { id: 'starter-sets', name: 'Starter Sets', image: 'https://images.unsplash.com/photo-1515488042361-404e9250afef?auto=format&fit=crop&q=80&w=300' },
-  { id: 't-shirts', name: 'T-Shirts', image: 'https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&q=80&w=300' },
-  { id: 'girls-frocks', name: 'Girls Frocks', image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&q=80&w=300' },
-  { id: 'jewelry-sets', name: 'Jewelry Sets', image: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&q=80&w=300' },
+  { id: 'trending-gadgets', name: 'Trending Gadgets', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=300' },
+  { id: 'trending-fashion', name: 'Trending Fashion', image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=300' },
+  { id: 'national-event', name: 'National & Event Wear', image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=80&w=300' },
+  { id: 'ramadan-eid', name: 'Ramadan & Eid', image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&q=80&w=300' },
+  { id: 'seasonal-collections', name: 'Seasonal Collections', image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=80&w=300' },
 ];
 
 export const PAKISTAN_CITIES = [

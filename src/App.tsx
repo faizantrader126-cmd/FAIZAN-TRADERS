@@ -116,6 +116,42 @@ export default function App() {
   // Flash sales deal countdown
   const [countdown, setCountdown] = useState({ hours: 4, minutes: 34, seconds: 12 });
 
+  // Category slider custom dynamic states with automatic rotating slide every 3 seconds
+  const [collectionsList, setCollectionsList] = useState([...COLLECTIONS]);
+
+  // Sync collections when COLLECTIONS updates
+  useEffect(() => {
+    setCollectionsList([...COLLECTIONS]);
+  }, []);
+
+  useEffect(() => {
+    const colSliderTimer = setInterval(() => {
+      setCollectionsList((prev) => {
+        if (prev.length <= 1) return prev;
+        const [first, ...rest] = prev;
+        return [...rest, first];
+      });
+    }, 3000);
+    return () => clearInterval(colSliderTimer);
+  }, []);
+
+  const handleNextColSlide = () => {
+    setCollectionsList((prev) => {
+      if (prev.length <= 1) return prev;
+      const [first, ...rest] = prev;
+      return [...rest, first];
+    });
+  };
+
+  const handlePrevColSlide = () => {
+    setCollectionsList((prev) => {
+      if (prev.length <= 1) return prev;
+      const last = prev[prev.length - 1];
+      const rest = prev.slice(0, -1);
+      return [last, ...rest];
+    });
+  };
+
   // Custom feedback/inquiry states
   const [inquiryName, setInquiryName] = useState('');
   const [inquiryPhone, setInquiryPhone] = useState('');
@@ -245,6 +281,22 @@ export default function App() {
 
   const handleClearCart = () => {
     saveCartToStorage([]);
+  };
+
+  const handleCollectionClick = (colId: string) => {
+    setSearchQuery('');
+    if (colId === 'trending-gadgets') {
+      setSearchQuery('gadget');
+    } else if (colId === 'trending-fashion') {
+      setSearchQuery('fashion');
+    } else if (colId === 'national-event') {
+      setSearchQuery('suit');
+    } else if (colId === 'ramadan-eid') {
+      setSearchQuery('suit');
+    } else {
+      setActiveCategory('all');
+    }
+    document.getElementById('product-catalog-grid')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   // Inquiry submit to Supabase
@@ -415,47 +467,90 @@ export default function App() {
         )}
       </section>
 
-      {/* 3. Shop by Collection - Circular Badges */}
-      <section className="py-12 bg-white border-b border-neutral-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-600 block mb-1">
-            KIDS COUTURE
+      {/* 3. Season Collection - Circular Auto-Sliding Carousel */}
+      <section className="py-12 bg-white border-b border-neutral-100 select-none overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative group/carousel">
+          <span className="text-[9px] font-black uppercase tracking-[0.25em] text-brand-gold bg-brand-black px-2.5 py-1 rounded-md inline-block mb-2">
+            Trending Categories
           </span>
-          <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight">
-            Shop by Collection
+          <h2 className="font-display text-2xl sm:text-3xl font-black text-brand-black tracking-tight uppercase">
+            Season Collection
           </h2>
+          <p className="text-[11px] text-zinc-400 font-medium mt-1">Discover what's hot & trending this week</p>
           
-          <div className="mt-8 flex items-center justify-start sm:justify-center gap-6 overflow-x-auto pb-4 scrollbar-none">
-            {COLLECTIONS.map((col) => (
-              <button
-                key={col.id}
-                onClick={() => {
-                  setSearchQuery('');
-                  // Support filter by text query if matching collections
-                  if (col.id === 'bodysuits') setSearchQuery('suit');
-                  else if (col.id === 'starter-sets') setSearchQuery('set');
-                  else if (col.id === 't-shirts') setSearchQuery('t-shirt');
-                  else if (col.id === 'girls-frocks') setSearchQuery('girls');
-                  else if (col.id === 'jewelry-sets') setSearchQuery('suit');
-                  else {
-                    setActiveCategory('all');
-                  }
-                  document.getElementById('product-catalog-grid')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="flex flex-col items-center group shrink-0 cursor-pointer text-center"
-              >
-                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full overflow-hidden border-2 border-neutral-100 group-hover:border-blue-600 transition-all duration-300 scale-100 group-hover:scale-105 shadow-xs">
-                  <img 
-                    src={col.image} 
-                    alt={col.name} 
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <span className="text-xs font-bold text-neutral-800 mt-3 group-hover:text-blue-600 transition-colors">
-                  {col.name}
-                </span>
-              </button>
-            ))}
+          <div className="relative mt-8 px-8 flex items-center justify-center">
+            {/* Left manual slide action */}
+            <button
+              onClick={handlePrevColSlide}
+              className="absolute left-0 z-20 h-10 w-10 rounded-full bg-brand-black text-white hover:bg-brand-gold hover:text-brand-black flex items-center justify-center shadow-md transition-all hover:scale-105 border border-brand-black/5 cursor-pointer"
+              title="Slide Left"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+
+            {/* Rotating Slider Container */}
+            <div className="flex items-center gap-4 sm:gap-6 md:gap-8 overflow-hidden w-full justify-center py-2">
+              <AnimatePresence mode="popLayout" initial={false}>
+                {collectionsList.map((col, idx) => {
+                  // Display only 5 on desktop, 3 on tablet, 2 on mobile to avoid overflow and maintain high fidelity layout
+                  const isVisible = idx < 5;
+                  if (!isVisible) return null;
+
+                  return (
+                    <motion.button
+                      layout
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                      key={col.id}
+                      onClick={() => handleCollectionClick(col.id)}
+                      className={`flex flex-col items-center group shrink-0 cursor-pointer text-center relative ${
+                        idx >= 2 ? 'flex' : 'flex'
+                      } ${
+                        idx >= 3 ? 'hidden sm:flex' : ''
+                      } ${
+                        idx >= 4 ? 'hidden md:flex' : ''
+                      }`}
+                    >
+                      <div className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 rounded-full overflow-hidden border-2 border-brand-black/5 group-hover:border-brand-gold transition-all duration-300 scale-100 group-hover:scale-105 shadow-md bg-zinc-50 relative flex items-center justify-center">
+                        {col.image ? (
+                          <img 
+                            src={col.image} 
+                            alt={col.name} 
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            onError={(e) => {
+                              // Custom robust fallback if image cannot load
+                              e.currentTarget.src = 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=300';
+                            }}
+                          />
+                        ) : (
+                          // Blank image / Placeholder pattern
+                          <div className="absolute inset-0 bg-zinc-100 flex items-center justify-center text-zinc-300">
+                            <ShoppingBag className="h-8 w-8" />
+                          </div>
+                        )}
+                        {/* Dynamic glow overlay */}
+                        <div className="absolute inset-0 bg-brand-black/5 group-hover:bg-transparent transition-colors pointer-events-none" />
+                      </div>
+                      
+                      <span className="text-[11px] sm:text-xs font-extrabold text-neutral-800 mt-3.5 group-hover:text-brand-gold transition-colors font-sans tracking-wide block max-w-[110px] sm:max-w-[130px] line-clamp-1">
+                        {col.name}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+
+            {/* Right manual slide action */}
+            <button
+              onClick={handleNextColSlide}
+              className="absolute right-0 z-20 h-10 w-10 rounded-full bg-brand-black text-white hover:bg-brand-gold hover:text-brand-black flex items-center justify-center shadow-md transition-all hover:scale-105 border border-brand-black/5 cursor-pointer"
+              title="Slide Right"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </section>
