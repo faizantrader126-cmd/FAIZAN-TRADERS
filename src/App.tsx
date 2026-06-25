@@ -513,7 +513,7 @@ export default function App() {
                         idx >= 4 ? 'hidden md:flex' : ''
                       }`}
                     >
-                      <div className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 rounded-full overflow-hidden border-2 border-brand-black/5 group-hover:border-brand-gold transition-all duration-300 scale-100 group-hover:scale-105 shadow-md bg-zinc-50 relative flex items-center justify-center">
+                      <div className="h-32 w-32 sm:h-40 sm:w-40 md:h-48 md:w-48 lg:h-52 lg:w-52 rounded-full overflow-hidden border-2 border-brand-black/5 group-hover:border-brand-gold transition-all duration-300 scale-100 group-hover:scale-105 shadow-md bg-zinc-50 relative flex items-center justify-center">
                         {col.image ? (
                           <img 
                             src={col.image} 
@@ -534,7 +534,7 @@ export default function App() {
                         <div className="absolute inset-0 bg-brand-black/5 group-hover:bg-transparent transition-colors pointer-events-none" />
                       </div>
                       
-                      <span className="text-[11px] sm:text-xs font-extrabold text-neutral-800 mt-3.5 group-hover:text-brand-gold transition-colors font-sans tracking-wide block max-w-[110px] sm:max-w-[130px] line-clamp-1">
+                      <span className="text-[12px] sm:text-sm font-extrabold text-neutral-800 mt-4 group-hover:text-brand-gold transition-colors font-sans tracking-wide block max-w-[130px] sm:max-w-[170px] line-clamp-1">
                         {col.name}
                       </span>
                     </motion.button>
