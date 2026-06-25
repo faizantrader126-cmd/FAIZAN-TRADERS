@@ -489,11 +489,11 @@ export default function App() {
             </button>
 
             {/* Rotating Slider Container */}
-            <div className="flex items-center gap-4 sm:gap-6 md:gap-8 overflow-hidden w-full justify-center py-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 w-full max-w-5xl mx-auto py-2 justify-items-center">
               <AnimatePresence mode="popLayout" initial={false}>
                 {collectionsList.map((col, idx) => {
-                  // Display only 5 on desktop, 3 on tablet, 2 on mobile to avoid overflow and maintain high fidelity layout
-                  const isVisible = idx < 5;
+                  // Display only 4 on desktop, 3 on tablet, 2 on mobile to avoid overflow and maintain perfect alignment with no cutoffs
+                  const isVisible = idx < 4;
                   if (!isVisible) return null;
 
                   return (
@@ -505,15 +505,11 @@ export default function App() {
                       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                       key={col.id}
                       onClick={() => handleCollectionClick(col.id)}
-                      className={`flex flex-col items-center group shrink-0 cursor-pointer text-center relative ${
-                        idx >= 2 ? 'flex' : 'flex'
-                      } ${
-                        idx >= 3 ? 'hidden sm:flex' : ''
-                      } ${
-                        idx >= 4 ? 'hidden md:flex' : ''
+                      className={`flex flex-col items-center group cursor-pointer text-center relative w-full ${
+                        idx === 2 ? 'hidden sm:flex' : idx === 3 ? 'hidden md:flex' : 'flex'
                       }`}
                     >
-                      <div className="h-32 w-32 sm:h-40 sm:w-40 md:h-48 md:w-48 lg:h-52 lg:w-52 rounded-full overflow-hidden border-2 border-brand-black/5 group-hover:border-brand-gold transition-all duration-300 scale-100 group-hover:scale-105 shadow-md bg-zinc-50 relative flex items-center justify-center">
+                      <div className="aspect-square w-full max-w-[120px] xs:max-w-[140px] sm:max-w-[160px] md:max-w-[180px] lg:max-w-[210px] rounded-full overflow-hidden border-2 border-brand-black/5 group-hover:border-black transition-all duration-300 scale-100 group-hover:scale-105 shadow-md bg-zinc-50 relative flex items-center justify-center mx-auto">
                         {col.image ? (
                           <img 
                             src={col.image} 
@@ -534,7 +530,7 @@ export default function App() {
                         <div className="absolute inset-0 bg-brand-black/5 group-hover:bg-transparent transition-colors pointer-events-none" />
                       </div>
                       
-                      <span className="text-[12px] sm:text-sm font-extrabold text-neutral-800 mt-4 group-hover:text-brand-gold transition-colors font-sans tracking-wide block max-w-[130px] sm:max-w-[170px] line-clamp-1">
+                      <span className="text-[12px] sm:text-sm font-extrabold text-neutral-800 mt-4 group-hover:text-black transition-colors font-sans tracking-wide block max-w-[110px] sm:max-w-[150px] line-clamp-1">
                         {col.name}
                       </span>
                     </motion.button>
