@@ -72,7 +72,7 @@ export default function ProductCard({
     const productName = product.name || 'Product';
     const message = `Hello The Sweet Baby Shop!\nI want to order your "${productName}"\nPrice: Rs. ${price.toLocaleString()}\nStock Status: In Stock\nPlease confirm my order!`;
     const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/9233426533873?text=${encodedMessage}`, '_blank');
+    window.open(`https://wa.me/923303511464?text=${encodedMessage}`, '_blank');
   };
 
   const handleMouseEnter = () => {

@@ -196,10 +196,10 @@ export default function Header({
               </button>
 
               <div className="flex items-center gap-3">
-                <a href="tel:+9203312187411" className="w-full bg-black text-white py-2.5 rounded-lg text-xs font-bold text-center block">
+                <a href="tel:+923303511464" className="w-full bg-black text-white py-2.5 rounded-lg text-xs font-bold text-center block">
                   Call Support
                 </a>
-                <a href="https://wa.me/92033426533873" className="w-full bg-[#25d366] text-white py-2.5 rounded-lg text-xs font-bold text-center block">
+                <a href="https://wa.me/923303511464" className="w-full bg-[#25d366] text-white py-2.5 rounded-lg text-xs font-bold text-center block">
                   WhatsApp Support
                 </a>
               </div>

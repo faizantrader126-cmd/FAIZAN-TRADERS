@@ -15,7 +15,7 @@ import { saveInquiryToSupabase } from './lib/supabase';
 
 // Icons
 import { 
-  Armchair, Sparkles, Utensils, Tv, Smartphone, Zap,
+  Bed, User, ChefHat, GlassWater, Sparkles, Utensils, Tv, Smartphone, Zap,
   ChevronLeft, ChevronRight, CheckCircle2, ShieldCheck, 
   Truck, HelpCircle, Mail, Send, AlertCircle, ShoppingBag, 
   ThumbsUp, Clock, MapPin, Phone, Award, Gem, Star
@@ -26,14 +26,13 @@ import { AnimatePresence, motion } from 'motion/react';
 const getCategoryIcon = (iconName: string) => {
   const iconClasses = "h-5 w-5 md:h-6 md:w-6 group-hover:rotate-12 transition-transform duration-300";
   switch (iconName) {
-    case 'Armchair': return <Armchair className={`${iconClasses} text-[#4b5563]`} />;
-    case 'Sparkles': return <Sparkles className={`${iconClasses} text-[#ca8a04]`} />;
-    case 'Utensils': return <Utensils className={`${iconClasses} text-[#064e3b]`} />;
-    case 'Tv': return <Tv className={`${iconClasses} text-[#1d4ed8]`} />;
-    case 'Smartphone': return <Smartphone className={`${iconClasses} text-[#7c3aed]`} />;
-    case 'Zap': return <Zap className={`${iconClasses} text-[#dc2626]`} />;
-    case 'Gem': return <Gem className={`${iconClasses} text-[#db2777]`} />;
-    default: return <Sparkles className={`${iconClasses} text-brand-black`} />;
+    case 'Bed': return <Bed className={`${iconClasses} text-neutral-800`} />;
+    case 'User': return <User className={`${iconClasses} text-neutral-800`} />;
+    case 'Smartphone': return <Smartphone className={`${iconClasses} text-neutral-800`} />;
+    case 'ChefHat': return <ChefHat className={`${iconClasses} text-neutral-800`} />;
+    case 'GlassWater': return <GlassWater className={`${iconClasses} text-neutral-800`} />;
+    case 'Sparkles': return <Sparkles className={`${iconClasses} text-neutral-800`} />;
+    default: return <ShoppingBag className={`${iconClasses} text-neutral-800`} />;
   }
 };
 
@@ -657,74 +656,74 @@ export default function App() {
         // --- PREMIUM BENTO LOOKBOOK HOMEPAGE (No Filters Active) ---
         <div id="product-catalog-grid" className="space-y-16 py-12 bg-neutral-50/30">
           
-          {/* Section A: New Arrivals Grid */}
+          {/* Section A: Bedsheets Grid */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
               <div>
                 <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">SWEET DEALS • 30% OFF</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">New Arrivals</h2>
+                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Premium Bedsheets</h2>
               </div>
               <button 
-                onClick={() => setActiveCategory('new-arrivals')}
+                onClick={() => setActiveCategory('bedsheet')}
                 className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
               >
-                View all new styles &rarr;
+                View all bedsheets &rarr;
               </button>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {products.filter(p => p.category === 'new-arrivals').slice(0, 4).map((prod) => (
+              {products.filter(p => p.category === 'bedsheet').slice(0, 4).map((prod) => (
                 <ProductCard
-                  key={prod.id}
-                  product={prod}
-                  onViewDetails={setSelectedProduct}
-                  onAddToCart={(p) => handleAddToCart(p, 1)}
-                  isItemInCart={cartItems.some(item => item.product.id === prod.id)}
+                   key={prod.id}
+                   product={prod}
+                   onViewDetails={setSelectedProduct}
+                   onAddToCart={(p) => handleAddToCart(p, 1)}
+                   isItemInCart={cartItems.some(item => item.product.id === prod.id)}
                 />
               ))}
             </div>
           </section>
 
-          {/* Section B: Best Sellers Grid */}
+          {/* Section B: Cloth Men and Women Grid */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
               <div>
-                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">MOST POPULAR • LOVED BY MOMS</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Best Sellers</h2>
+                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">MOST POPULAR • LOVED BY ALL</span>
+                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Cloth Men and Women</h2>
               </div>
               <button 
-                onClick={() => setActiveCategory('best-sellers')}
+                onClick={() => setActiveCategory('cloth-men-women')}
                 className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
               >
-                View all best sellers &rarr;
+                View all clothes &rarr;
               </button>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {products.filter(p => p.category === 'best-sellers').slice(0, 4).map((prod) => (
+              {products.filter(p => p.category === 'cloth-men-women').slice(0, 4).map((prod) => (
                 <ProductCard
-                  key={prod.id}
-                  product={prod}
-                  onViewDetails={setSelectedProduct}
-                  onAddToCart={(p) => handleAddToCart(p, 1)}
-                  isItemInCart={cartItems.some(item => item.product.id === prod.id)}
+                   key={prod.id}
+                   product={prod}
+                   onViewDetails={setSelectedProduct}
+                   onAddToCart={(p) => handleAddToCart(p, 1)}
+                   isItemInCart={cartItems.some(item => item.product.id === prod.id)}
                 />
               ))}
             </div>
           </section>
 
-          {/* Section C: Shorts & Pants - Bento Spotlight Layout */}
+          {/* Section C: Electronic & Gadgets - Bento Spotlight Layout */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
               <div>
-                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">DURABLE COTTON & WASHED DENIM</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Shorts & Pants</h2>
+                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">COOL DEVICES & SMART LIFESTYLE</span>
+                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Electronic & Gadgets</h2>
               </div>
               <button 
-                onClick={() => setActiveCategory('shorts-pants')}
+                onClick={() => setActiveCategory('electronic-gadgets')}
                 className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
               >
-                View all shorts &rarr;
+                View all gadgets &rarr;
               </button>
             </div>
 
@@ -732,8 +731,8 @@ export default function App() {
               {/* Premium Lookbook Promotional Banner Card (1/3 wide) */}
               <div className="lg:col-span-4 relative rounded-2xl overflow-hidden aspect-4/5 lg:aspect-auto bg-neutral-900 text-white min-h-[350px] lg:min-h-full flex flex-col justify-end p-6 sm:p-8 shadow-md group">
                 <img 
-                  src="https://images.unsplash.com/photo-1519689680058-324335c77ebe?auto=format&fit=crop&q=80&w=600" 
-                  alt="Shorts and Pants Lookbook" 
+                  src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&q=80&w=600" 
+                  alt="Electronic and Gadgets Lookbook" 
                   className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
@@ -743,14 +742,14 @@ export default function App() {
                     FLAT 30% OFF
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
-                    Playful & Flexible Shorts
+                    Smart Daily Devices
                   </h3>
                   <p className="text-zinc-200 text-xs">
-                    Engineered in ultra-stretch pre-softened cotton to allow unlimited bounds, rolls & crawly adventures.
+                    Curated with the latest high-performance audio systems, portable fitness bands and ambient lamps.
                   </p>
                   <div className="pt-2">
                     <button 
-                      onClick={() => setActiveCategory('shorts-pants')}
+                      onClick={() => setActiveCategory('electronic-gadgets')}
                       className="bg-white text-black hover:bg-zinc-100 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
                     >
                       Shop Collection
@@ -761,7 +760,7 @@ export default function App() {
 
               {/* 3-Column Product List Next to it (2/3 wide) */}
               <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {products.filter(p => p.category === 'shorts-pants').slice(0, 3).map((prod) => (
+                {products.filter(p => p.category === 'electronic-gadgets').slice(0, 3).map((prod) => (
                   <ProductCard
                     key={prod.id}
                     product={prod}
@@ -774,25 +773,25 @@ export default function App() {
             </div>
           </section>
 
-          {/* Section D: Nightsuits - Bento Spotlight Layout */}
+          {/* Section D: Kitchen Accessories - Bento Spotlight Layout */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
               <div>
-                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">COZY DREAMS • WINTER SOFT JERSEY</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Nightsuits Collection</h2>
+                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">PRACTICAL & MODERN HOME COOKING</span>
+                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Kitchen Accessories</h2>
               </div>
               <button 
-                onClick={() => setActiveCategory('nightsuits')}
+                onClick={() => setActiveCategory('kitchen-accessories')}
                 className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
               >
-                View all nightsuits &rarr;
+                View all accessories &rarr;
               </button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* 3-Column Product List (2/3 wide) */}
               <div className="lg:col-span-8 order-2 lg:order-1 grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {products.filter(p => p.category === 'nightsuits').slice(0, 3).map((prod) => (
+                {products.filter(p => p.category === 'kitchen-accessories').slice(0, 3).map((prod) => (
                   <ProductCard
                     key={prod.id}
                     product={prod}
@@ -806,28 +805,28 @@ export default function App() {
               {/* Premium Lookbook Promotional Banner Card (1/3 wide) on the right */}
               <div className="lg:col-span-4 order-1 lg:order-2 relative rounded-2xl overflow-hidden aspect-4/5 lg:aspect-auto bg-neutral-900 text-white min-h-[350px] lg:min-h-full flex flex-col justify-end p-6 sm:p-8 shadow-md group">
                 <img 
-                  src="https://images.unsplash.com/photo-1541412031570-3df08e9d4df2?auto=format&fit=crop&q=80&w=600" 
-                  alt="Nightsuits Lookbook" 
+                  src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=600" 
+                  alt="Kitchen Accessories Lookbook" 
                   className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
                 
                 <div className="relative z-10 text-left space-y-3">
                   <span className="bg-white text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-white/10">
-                    SWEET COMFORT
+                    MODERN KITCHEN
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
-                    Dreamy Soft Pajama Sets
+                    Premium Cooking Tools
                   </h3>
                   <p className="text-zinc-200 text-xs">
-                    Designed in dual-layered combed interlock knit to secure premium sleep comfort during breezy cold nights.
+                    Crafted with premium grade food-safe silicone, warm organic beechwood handles & durable steel.
                   </p>
                   <div className="pt-2">
                     <button 
-                      onClick={() => setActiveCategory('nightsuits')}
+                      onClick={() => setActiveCategory('kitchen-accessories')}
                       className="bg-white text-black hover:bg-zinc-100 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
                     >
-                      Shop Cozy Wear
+                      Shop Kitchen Wear
                     </button>
                   </div>
                 </div>
@@ -835,18 +834,18 @@ export default function App() {
             </div>
           </section>
 
-          {/* Section E: Essentials & Nursery Backpacks - Bento Spotlight Layout */}
+          {/* Section E: Water Bottles - Bento Spotlight Layout */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
               <div>
-                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">BABY CARRY PODS, BAGS & LUXURY GIFTBOXES</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Baby Essentials</h2>
+                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">BPA-FREE TRITAN & INSULATED STEEL FLASKS</span>
+                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Water Bottles</h2>
               </div>
               <button 
-                onClick={() => setActiveCategory('essentials')}
+                onClick={() => setActiveCategory('water-bottles')}
                 className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
               >
-                View all essentials &rarr;
+                View all bottles &rarr;
               </button>
             </div>
 
@@ -854,28 +853,28 @@ export default function App() {
               {/* Premium Lookbook Promotional Banner Card (1/3 wide) */}
               <div className="lg:col-span-4 relative rounded-2xl overflow-hidden aspect-4/5 lg:aspect-auto bg-neutral-900 text-white min-h-[350px] lg:min-h-full flex flex-col justify-end p-6 sm:p-8 shadow-md group">
                 <img 
-                  src="https://images.unsplash.com/photo-1595079676339-1534801ad6cf?auto=format&fit=crop&q=80&w=600" 
-                  alt="Essentials Lookbook" 
+                  src="https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&q=80&w=600" 
+                  alt="Water Bottles Lookbook" 
                   className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
                 
                 <div className="relative z-10 text-left space-y-3">
                   <span className="bg-white text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-white/10">
-                    MUST-HAVE SETS
+                    BPA FREE HYDRATION
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
-                    Nursery Pods & Travel Bags
+                    Insulated Thermal Flasks
                   </h3>
                   <p className="text-zinc-200 text-xs">
-                    Multi-compartment insulated nursery bags and soft baby pods made with deep affection.
+                    Keep liquids cold up to 24 hours or steaming hot for 12 hours with smart leakproof travel options.
                   </p>
                   <div className="pt-2">
                     <button 
-                      onClick={() => setActiveCategory('essentials')}
+                      onClick={() => setActiveCategory('water-bottles')}
                       className="bg-white text-black hover:bg-zinc-100 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
                     >
-                      Shop Essentials
+                      Shop Bottles
                     </button>
                   </div>
                 </div>
@@ -883,7 +882,7 @@ export default function App() {
 
               {/* 3-Column Product List (2/3 wide) */}
               <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {products.filter(p => p.category === 'essentials').slice(0, 3).map((prod) => (
+                {products.filter(p => p.category === 'water-bottles').slice(0, 3).map((prod) => (
                   <ProductCard
                     key={prod.id}
                     product={prod}
@@ -1077,11 +1076,8 @@ export default function App() {
               <div>
                 <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Call Line Support:</h4>
                 <div className="space-y-1 mt-1 font-mono text-xs font-extrabold text-neutral-800">
-                  <a href="tel:+9233426533873" className="hover:underline block">
-                    +92 334 26533873
-                  </a>
-                  <a href="tel:+923312187411" className="hover:underline block">
-                    +92 331 2187411
+                  <a href="tel:+923303511464" className="hover:underline block">
+                    +92 330 3511464
                   </a>
                 </div>
               </div>
@@ -1142,7 +1138,7 @@ export default function App() {
                   type="tel" 
                   value={inquiryPhone}
                   onChange={(e) => setInquiryPhone(e.target.value)}
-                  placeholder="e.g. 033426533873"
+                  placeholder="e.g. 03303511464"
                   required
                   className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-mono font-bold text-neutral-900"
                 />
@@ -1275,7 +1271,7 @@ export default function App() {
 
       {/* 10. Sticky WhatsApp Floating badge indicator clickable bottom right */}
       <a
-        href="https://wa.me/9233426533873?text=Assalam-o-Alaikum%20The%20Sweet%20Baby%20Shop!%20I%20am%20visiting%20your%20website%20and%20I%20need%20assistance%20on%20premium%20baby%20products."
+        href="https://wa.me/923303511464?text=Assalam-o-Alaikum%20The%20Sweet%20Baby%20Shop!%20I%20am%20visiting%20your%20website%20and%20I%20need%20assistance."
         target="_blank"
         referrerPolicy="no-referrer"
         className="fixed bottom-6 right-6 z-40 flex items-center justify-center rounded-full bg-[#25d366] p-4 text-white shadow-2xl hover:scale-105 transition-transform group"
