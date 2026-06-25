@@ -15,6 +15,8 @@ interface ProductManagerModalProps {
   onSaveProducts: (updated: Product[]) => void;
   slides: BannerSlide[];
   onSaveSlides: (updated: BannerSlide[]) => void;
+  sessionOrders: any[];
+  onSimulateStatus: (orderId: string) => void;
 }
 
 // Preset curation of premium commercial search images categorized to make adding items super effortless!
@@ -115,7 +117,15 @@ function compressImage(
   });
 }
 
-export default function ProductManagerModal({ products, onClose, onSaveProducts, slides, onSaveSlides }: ProductManagerModalProps) {
+export default function ProductManagerModal({ 
+  products, 
+  onClose, 
+  onSaveProducts, 
+  slides, 
+  onSaveSlides,
+  sessionOrders,
+  onSimulateStatus
+}: ProductManagerModalProps) {
   // Authentication states
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return localStorage.getItem('faizan_isAdmin') === 'true';
@@ -145,7 +155,7 @@ export default function ProductManagerModal({ products, onClose, onSaveProducts,
   const [signupPass, setSignupPass] = useState('');
 
   // Primary active Admin tab view
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'slides' | 'orders' | 'inquiries' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'slides' | 'orders' | 'inquiries' | 'settings' | 'session_orders'>('dashboard');
 
   const [customLogo, setCustomLogo] = useState<string>(() => {
     return localStorage.getItem('custom_store_logo') || '';
@@ -291,13 +301,18 @@ export default function ProductManagerModal({ products, onClose, onSaveProducts,
 
   const handleAdminSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!signupEmail.trim() || !signupUser.trim() || !signupPass.trim()) {
+    const emailVal = signupEmail.trim().toLowerCase();
+    if (emailVal !== 'faizantrader126@gmail.com') {
+      setPasscodeError('Access Denied: Registration is strictly restricted to faizantrader126@gmail.com.');
+      return;
+    }
+    if (!signupUser.trim() || !signupPass.trim()) {
       setPasscodeError('Please fill in all details.');
       return;
     }
     const newUser = {
-      email: signupEmail.trim(),
-      username: signupUser.trim().toLowerCase(),
+      email: 'faizantrader126@gmail.com',
+      username: 'faizan',
       password: signupPass.trim()
     };
     localStorage.setItem('faizan_registered_admin', JSON.stringify(newUser));
@@ -305,7 +320,7 @@ export default function ProductManagerModal({ products, onClose, onSaveProducts,
     setRegisteredAdmin(newUser);
     setIsAuthenticated(true);
     setPasscodeError('');
-    alert(`As-Salam-o-Alaikum ${newUser.username}! admin setup completed! Exactly 1 administrative user has been lock-registered.`);
+    alert(`As-Salam-o-Alaikum Faizan Bhai! Admin setup completed! Registered under faizantrader126@gmail.com successfully. ✨`);
   };
 
   const handleAdminLogin = (e: React.FormEvent) => {
@@ -313,7 +328,12 @@ export default function ProductManagerModal({ products, onClose, onSaveProducts,
     const enteredVal = loginUser.trim().toLowerCase();
     const enteredPass = loginPass.trim();
 
-    // Setup fallback support
+    // Enforce restricted access
+    if (enteredVal !== 'faizan' && enteredVal !== 'faizantrader126@gmail.com') {
+      setPasscodeError('Access Denied: Only faizantrader126@gmail.com / faizan is allowed to login.');
+      return;
+    }
+
     if (!registeredAdmin) {
       if (enteredPass === '126' || enteredPass.toLowerCase() === 'admin') {
         localStorage.setItem('faizan_isAdmin', 'true');
@@ -337,10 +357,10 @@ export default function ProductManagerModal({ products, onClose, onSaveProducts,
         localStorage.setItem('faizan_isAdmin', 'true');
         setIsAuthenticated(true);
         setPasscodeError('');
-        alert('Welcome! Admin bypass accepted using master code "126". It is safer to use your registered credentials.');
+        alert('Welcome Faizan Bhai! Admin bypass accepted using master code "126".');
         return;
       }
-      setPasscodeError('Incorrect Username or Password. Please try again or use the developer backup code "126".');
+      setPasscodeError('Incorrect Password. Please try again or use your master code "126".');
     }
   };
 
@@ -639,26 +659,24 @@ export default function ProductManagerModal({ products, onClose, onSaveProducts,
 
                 <form onSubmit={handleAdminSignup} className="space-y-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">Your Email</label>
+                    <label className="text-[10px] font-bold text-red-600 uppercase tracking-wider font-mono">Your Authorized Email (Locked)</label>
                     <input
                       type="email"
                       required
-                      value={signupEmail}
-                      onChange={(e) => setSignupEmail(e.target.value)}
-                      placeholder="faizantrader126@gmail.com"
-                      className="w-full bg-brand-lightgray border border-brand-black/10 rounded-xl px-3 py-1.5 text-xs font-mono"
+                      readOnly
+                      value="faizantrader126@gmail.com"
+                      className="w-full bg-neutral-100 border border-brand-black/10 rounded-xl px-3 py-1.5 text-xs font-mono text-zinc-500 cursor-not-allowed font-semibold"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">Enter Username</label>
+                    <label className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">Enter Username (Locked)</label>
                     <input
                       type="text"
                       required
-                      value={signupUser}
-                      onChange={(e) => setSignupUser(e.target.value)}
-                      placeholder="faizan"
-                      className="w-full bg-brand-lightgray border border-brand-black/10 rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                      readOnly
+                      value="faizan"
+                      className="w-full bg-neutral-100 border border-brand-black/10 rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-zinc-500 cursor-not-allowed"
                     />
                   </div>
 
@@ -892,6 +910,23 @@ export default function ProductManagerModal({ products, onClose, onSaveProducts,
           >
             <Layers className="h-4 w-4 text-orange-400" />
             <span>⚙️ Logo Settings</span>
+          </button>
+
+          <button
+            onClick={() => { setActiveTab('session_orders'); setCurrentView('list'); }}
+            className={`px-3 py-2.5 text-xs font-semibold tracking-wider flex items-center gap-1.5 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === 'session_orders' && !isFormActive && currentView !== 'slides'
+                ? 'border-brand-gold text-white font-extrabold' 
+                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Layers className="h-4 w-4 text-amber-500" />
+            <span>🚚 Local Order Tracker</span>
+            {sessionOrders.length > 0 && (
+              <span className="ml-1 bg-amber-500 text-[9px] font-black font-mono text-zinc-950 px-1.5 py-0.5 rounded-full">
+                {sessionOrders.length}
+              </span>
+            )}
           </button>
         </div>
 
@@ -1604,6 +1639,137 @@ CREATE TABLE IF NOT EXISTS orders (
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* VIEW: LOCAL SESSION ORDERS TRACKER */}
+          {currentView === 'list' && activeTab === 'session_orders' && !isFormActive && (
+            <div className="bg-white border border-brand-black/5 rounded-2xl p-6 shadow-xs max-w-3xl mx-auto space-y-6">
+              <div className="border-b border-brand-black/5 pb-4">
+                <h3 className="font-display font-extrabold text-sm uppercase tracking-wider text-brand-black">🚚 Live Local Session Delivery Tracker</h3>
+                <p className="text-[10px] text-zinc-500 font-medium">View, track, and simulate status transitions of customer Cash On Delivery orders placed in this session.</p>
+              </div>
+
+              {sessionOrders.length === 0 ? (
+                <div className="text-center py-12 text-zinc-400 font-medium">
+                  <p className="text-xs">No active orders placed in this session yet.</p>
+                  <p className="text-[10px] mt-1 text-zinc-400">Add products to your cart and complete checkout to see them simulated here.</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {sessionOrders.map((ord) => {
+                    const step = 
+                      ord.status === 'Pending' ? 1 : 
+                      ord.status === 'Shipped' ? 2 : 3;
+
+                    return (
+                      <div key={ord.id} className="border border-neutral-200 rounded-xl p-5 bg-zinc-50 relative hover:shadow-xs transition-shadow">
+                        
+                        {/* Upper row */}
+                        <div className="flex flex-wrap justify-between items-start gap-2 border-b border-neutral-100 pb-3">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-xs font-bold text-black">{ord.id}</span>
+                              <span className={`text-[9px] uppercase tracking-wider font-mono font-bold px-2 py-0.5 rounded-md ${
+                                ord.status === 'Pending' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                                ord.status === 'Shipped' ? 'bg-blue-100 text-blue-800 border border-blue-200 animate-pulse' :
+                                'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                              }`}>
+                                {ord.status}
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-neutral-400 font-mono mt-1">
+                              Placed: {ord.date}
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            <span className="text-[9px] text-neutral-400 font-bold uppercase tracking-wider block font-mono">Invoice Bill</span>
+                            <h4 className="font-mono text-xs font-black text-black mt-0.5">Rs. {ord.totalAmount.toLocaleString()}</h4>
+                          </div>
+                        </div>
+
+                        {/* Progress tracking gauge */}
+                        <div className="py-4">
+                          <div className="relative flex items-center justify-between">
+                            {/* Connecting background bar */}
+                            <div className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 bg-zinc-200 z-0" />
+                            <div 
+                              style={{ width: step === 1 ? '0%' : step === 2 ? '50%' : '100%' }}
+                              className="absolute left-0 top-1/2 h-0.5 -translate-y-1/2 bg-black transition-all duration-500 z-0" 
+                            />
+
+                            {/* Node 1 */}
+                            <div className="z-10 flex flex-col items-center">
+                              <div className={`h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
+                                step >= 1 ? 'bg-black text-white ring-4 ring-zinc-100' : 'bg-zinc-200 text-zinc-500'
+                              }`}>
+                                1
+                              </div>
+                              <span className="text-[9px] font-bold text-neutral-600 mt-1">Received</span>
+                            </div>
+
+                            {/* Node 2 */}
+                            <div className="z-10 flex flex-col items-center">
+                              <div className={`h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
+                                step >= 2 ? 'bg-black text-white ring-4 ring-zinc-100' : 'bg-zinc-200 text-zinc-500'
+                              }`}>
+                                2
+                              </div>
+                              <span className="text-[9px] font-bold text-neutral-600 mt-1">Leopard Courier</span>
+                            </div>
+
+                            {/* Node 3 */}
+                            <div className="z-10 flex flex-col items-center">
+                              <div className={`h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
+                                step >= 3 ? 'bg-black text-white ring-4 ring-zinc-100' : 'bg-zinc-200 text-zinc-500'
+                              }`}>
+                                3
+                              </div>
+                              <span className="text-[9px] font-bold text-neutral-600 mt-1">Delivered</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Delivery address details */}
+                        <div className="bg-white p-3 rounded-lg border border-neutral-100 text-xs text-neutral-600 space-y-1">
+                          <div><strong>Recipient:</strong> {ord.customerDetails?.name} ({ord.customerDetails?.city})</div>
+                          <div className="text-neutral-500"><strong>Address:</strong> {ord.customerDetails?.address}</div>
+                          <div className="text-neutral-500"><strong>Phone:</strong> {ord.customerDetails?.phone}</div>
+                        </div>
+
+                        {/* Items summary */}
+                        <div className="mt-3 text-xs">
+                          <h4 className="font-bold text-black mb-1.5 uppercase text-[9px]">Package Items:</h4>
+                          <ul className="divide-y divide-neutral-100 bg-white px-3 py-1.5 rounded-lg border border-neutral-100">
+                            {ord.items?.map((item: any, itemIdx: number) => (
+                              <li key={itemIdx} className="py-1.5 flex justify-between text-neutral-600 text-[11px]">
+                                <span>{item.product?.name || 'Product'} x {item.quantity} {item.selectedSize ? `(${item.selectedSize})` : ''}</span>
+                                <span className="font-mono font-bold text-zinc-950">Rs. {((item.product?.price || 0) * item.quantity).toLocaleString()}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Action simulation trigger */}
+                        {ord.status !== 'Delivered' && (
+                          <div className="mt-4 flex justify-end">
+                            <button
+                              onClick={() => {
+                                onSimulateStatus(ord.id);
+                                alert('Cargo delivery step simulated successfully! 🚚');
+                              }}
+                              className="bg-brand-black hover:bg-zinc-800 text-white font-bold text-[9px] px-3.5 py-2 rounded-lg font-mono uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-sm transition-transform hover:scale-[1.02]"
+                            >
+                              <span>Simulate Speed Cargo Deliver 🚚</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 

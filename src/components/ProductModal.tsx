@@ -250,7 +250,7 @@ export default function ProductModal({
                           className="relative aspect-square w-12 shrink-0 rounded-lg overflow-hidden border transition-all scale-95 shadow-xs border-black ring-1 ring-black bg-white"
                         >
                           <img src={customActiveImage} alt="" className="h-full w-full object-cover animate-pulse" />
-                          <div className="absolute inset-x-0 bottom-0 bg-amber-500/90 text-[7px] font-mono text-center font-bold text-black uppercase py-0.5 tracking-wider">
+                          <div className="absolute inset-x-0 bottom-0 bg-black/95 text-[7px] font-mono text-center font-bold text-white uppercase py-0.5 tracking-wider">
                             Variant
                           </div>
                         </button>
@@ -292,7 +292,7 @@ export default function ProductModal({
             <div className="flex gap-1.5 flex-wrap">
               {product.features.slice(0, 3).map((feat, idx) => (
                 <span key={idx} className="bg-white/60 text-neutral-700 border border-neutral-200 px-2.5 py-1 rounded-md text-[10px] font-medium flex items-center gap-1">
-                  <Sparkles className="h-3 w-3 text-amber-500" />
+                  <Sparkles className="h-3 w-3 text-black" />
                   {feat}
                 </span>
               ))}
@@ -303,7 +303,7 @@ export default function ProductModal({
         {/* Column Right: Details, Variators, Shipping selection, Quick checkout & reviews */}
         <div className="md:col-span-7 overflow-y-auto p-6 md:p-8 flex flex-col justify-between max-h-[50vh] md:max-h-full text-left">
           <div>
-            <span className="text-xs font-bold tracking-wider text-amber-600 uppercase font-mono">
+            <span className="text-xs font-bold tracking-wider text-zinc-600 uppercase font-mono">
               {product.category.replace('-', ' ')}
             </span>
             <h2 className="font-display text-2xl font-bold text-black mt-1 leading-tight uppercase tracking-tight">
@@ -312,7 +312,7 @@ export default function ProductModal({
 
             {/* Stars rating banner details */}
             <div className="mt-2.5 flex items-center gap-2">
-              <div className="flex text-amber-400">
+              <div className="flex text-zinc-900">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star 
                     key={i} 
@@ -409,7 +409,7 @@ export default function ProductModal({
                 <div>
                   <div className="flex justify-between items-center">
                     <label className="text-xs font-bold text-black uppercase font-mono tracking-wider">Select Size Variant:</label>
-                    <span className="text-xs font-semibold text-amber-600 font-mono">
+                    <span className="text-xs font-semibold text-zinc-600 font-mono">
                       {selectedSize.includes('Seater') && selectedSize !== '1 Seater' ? '+ Price adjustments' : 'Standard'}
                     </span>
                   </div>
@@ -453,7 +453,7 @@ export default function ProductModal({
                     </button>
                   </div>
                   {product.stock <= 10 && (
-                    <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg">
+                    <span className="text-[11px] font-bold text-zinc-900 bg-zinc-100 border border-zinc-200 px-3 py-1.5 rounded-lg">
                       Hurry, only {product.stock} left!
                     </span>
                   )}
@@ -497,7 +497,7 @@ export default function ProductModal({
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-neutral-700">
                 {product.features.map((item, idx) => (
                   <li key={idx} className="flex items-start gap-2.5">
-                    <span className="text-amber-500 font-bold mt-0.5">•</span>
+                    <span className="text-black font-extrabold mt-0.5">•</span>
                     {item}
                   </li>
                 ))}
@@ -518,7 +518,7 @@ export default function ProductModal({
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="text-xs font-bold text-black">{rev.writer}</h4>
-                        <div className="flex text-amber-400 mt-1">
+                        <div className="flex text-zinc-900 mt-1">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <Star 
                               key={i} 
@@ -550,7 +550,7 @@ export default function ProductModal({
                   
                   <div className="flex items-center gap-2 bg-white border border-neutral-200 rounded-lg px-3 py-2.5">
                     <span className="text-xs text-neutral-500 font-medium">Your Rating:</span>
-                    <div className="flex text-amber-400">
+                    <div className="flex text-zinc-900">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <button
                           key={i}

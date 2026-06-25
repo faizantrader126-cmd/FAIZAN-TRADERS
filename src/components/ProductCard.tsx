@@ -102,7 +102,7 @@ export default function ProductCard({
           </span>
         )}
         {product.badge && (
-          <span className="rounded-md bg-amber-500 px-2 py-0.5 text-[9px] font-bold tracking-wider text-white uppercase font-mono shadow-xs">
+          <span className="rounded-md bg-zinc-900 px-2 py-0.5 text-[9px] font-bold tracking-wider text-white uppercase font-mono shadow-xs">
             {product.badge}
           </span>
         )}
@@ -111,13 +111,13 @@ export default function ProductCard({
       {/* Stock indicators - Elegant Minimog micro-labels */}
       <div className="absolute top-3 right-3 z-10">
         {(product.stock || 0) < 15 ? (
-          <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[8px] font-bold text-amber-700 border border-amber-200/50">
-            <span className="h-1 w-1 rounded-full bg-amber-500 animate-pulse" />
+          <span className="flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-0.5 text-[8px] font-bold text-zinc-900 border border-zinc-250/50">
+            <span className="h-1 w-1 rounded-full bg-black animate-pulse" />
             {product.stock || 0} Left
           </span>
         ) : (
-          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[8px] font-bold text-emerald-700 border border-emerald-200/50">
-            <span className="h-1 w-1 rounded-full bg-emerald-500" />
+          <span className="flex items-center gap-1 rounded-full bg-neutral-50 px-2 py-0.5 text-[8px] font-bold text-zinc-800 border border-neutral-200/50">
+            <span className="h-1 w-1 rounded-full bg-zinc-400" />
             In Stock
           </span>
         )}
@@ -155,7 +155,7 @@ export default function ProductCard({
         </span>
 
         {/* Product Title */}
-        <h3 className="font-display text-sm font-semibold text-neutral-800 line-clamp-1 group-hover:text-amber-600 transition-colors duration-200">
+        <h3 className="font-display text-sm font-semibold text-neutral-800 line-clamp-1 group-hover:text-black group-hover:underline transition-colors duration-200">
           {product.name || 'Unnamed Product'}
         </h3>
 
@@ -185,11 +185,11 @@ export default function ProductCard({
 
         {/* Star Rating summary */}
         <div className="mt-1.5 flex items-center gap-1">
-          <div className="flex text-amber-400">
+          <div className="flex text-zinc-900">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star 
                 key={i} 
-                className={`h-3 w-3 ${i < Math.floor(product.rating || 0) ? 'fill-current' : 'opacity-25'}`} 
+                className={`h-3 w-3 ${i < Math.floor(product.rating || 0) ? 'fill-current' : 'opacity-20'}`} 
               />
             ))}
           </div>

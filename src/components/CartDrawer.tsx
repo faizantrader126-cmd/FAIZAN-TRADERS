@@ -108,7 +108,7 @@ export default function CartDrawer({
                 <div className="h-1.5 w-full bg-neutral-200 rounded-full overflow-hidden">
                   <div 
                     style={{ width: `${Math.min((subtotal / freeShippingThreshold) * 100, 100)}%` }}
-                    className="h-full bg-amber-500 rounded-full transition-all duration-300"
+                    className="h-full bg-black rounded-full transition-all duration-300"
                   />
                 </div>
               </div>
@@ -170,7 +170,7 @@ export default function CartDrawer({
                              </span>
                            )}
                            {item.selectedSize && (
-                             <span className="bg-white border border-neutral-200 text-[9px] px-1.5 py-0.5 rounded-md text-amber-600 font-mono font-bold">
+                             <span className="bg-white border border-neutral-200 text-[9px] px-1.5 py-0.5 rounded-md text-neutral-600 font-mono font-bold">
                                Size: {item.selectedSize}
                              </span>
                            )}

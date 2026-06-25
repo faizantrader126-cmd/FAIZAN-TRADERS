@@ -70,21 +70,11 @@ export default function Header({
           {/* Owner Catalog Desk */}
           <button
             onClick={onManagerClick}
-            className="flex items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/5 px-2.5 sm:px-3.5 py-2 text-xs font-extrabold text-amber-600 hover:bg-black hover:text-white hover:border-black transition-all cursor-pointer"
+            className="flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 sm:px-3.5 py-2 text-xs font-extrabold text-black hover:bg-black hover:text-white hover:border-black transition-all cursor-pointer"
             title="Manage store items, edit prices & stock"
           >
             <Sliders className="h-4 w-4" />
             <span className="hidden lg:inline">Manage Items</span>
-          </button>
-
-          {/* Order Tracker */}
-          <button
-            onClick={onTrackerClick}
-            className="flex items-center gap-1.5 rounded-lg border border-neutral-200 px-2.5 sm:px-3.5 py-2 text-xs font-bold text-black hover:bg-black hover:text-white hover:border-black transition-all cursor-pointer"
-            title="Track my Cash On Delivery orders"
-          >
-            <ClipboardList className="h-4 w-4" />
-            <span className="hidden sm:inline">My Orders</span>
           </button>
 
           {/* Cart triggers */}
@@ -95,7 +85,7 @@ export default function Header({
             <ShoppingBag className="h-4 w-4" />
             <span className="hidden sm:inline">Cart</span>
             {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-black text-white font-mono shadow-xs ring-2 ring-white">
+              <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black text-[10px] font-black text-white font-mono shadow-xs ring-2 ring-white">
                 {cartCount}
               </span>
             )}
@@ -200,7 +190,7 @@ export default function Header({
                   onManagerClick();
                   setMobileMenuOpen(false);
                 }}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs py-2.5 rounded-lg text-center block cursor-pointer"
+                className="w-full bg-black hover:bg-neutral-900 text-white font-extrabold text-xs py-2.5 rounded-lg text-center block cursor-pointer"
               >
                 Owner Panel: Manage Items ⚙️
               </button>

@@ -392,7 +392,7 @@ export default function App() {
                 <div className="absolute inset-0 flex items-center justify-start p-6 sm:p-12 md:p-16 text-left select-none">
                   <div className="max-w-xs sm:max-w-lg md:max-w-xl space-y-1.5 sm:space-y-3.5 z-20 animate-fade-in">
                     {slides[currentSlideIdx].badge && (
-                      <span className="inline-block bg-brand-gold text-brand-black text-[9px] sm:text-[11px] font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-wider shadow-md">
+                      <span className="inline-block bg-white text-black text-[9px] sm:text-[11px] font-black px-2.5 sm:px-3.5 py-0.5 sm:py-1 rounded-full uppercase tracking-wider shadow-md border border-black/10">
                         {slides[currentSlideIdx].badge}
                       </span>
                     )}
@@ -403,13 +403,13 @@ export default function App() {
                       {slides[currentSlideIdx].subtitle}
                     </p>
                     {slides[currentSlideIdx].priceText && (
-                      <div className="text-brand-gold text-xs sm:text-sm md:text-lg font-black font-mono tracking-wide">
+                      <div className="text-white text-xs sm:text-sm md:text-lg font-black font-mono tracking-wide border-l-2 border-white pl-2">
                         {slides[currentSlideIdx].priceText}
                       </div>
                     )}
                     
                     <div className="pt-1 sm:pt-3">
-                      <span className="inline-flex items-center gap-1.5 bg-white text-brand-black hover:bg-brand-gold hover:text-brand-black font-black text-[8px] sm:text-[10px] md:text-xs px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl uppercase tracking-wider transition-all duration-300 shadow-lg">
+                      <span className="inline-flex items-center gap-1.5 bg-white text-black hover:bg-zinc-100 font-black text-[8px] sm:text-[10px] md:text-xs px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl uppercase tracking-wider transition-all duration-300 shadow-lg">
                         <span>Shop Now</span>
                         <ShoppingBag className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                       </span>
@@ -452,7 +452,7 @@ export default function App() {
                     key={idx}
                     onClick={() => setCurrentSlideIdx(idx)}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
-                      currentSlideIdx === idx ? 'w-5 bg-brand-gold' : 'w-1.5 bg-white/45 hover:bg-white'
+                      currentSlideIdx === idx ? 'w-5 bg-white' : 'w-1.5 bg-white/45 hover:bg-white'
                     }`}
                     aria-label={`Go to slide ${idx + 1}`}
                   />
@@ -470,7 +470,7 @@ export default function App() {
       {/* 3. Season Collection - Circular Auto-Sliding Carousel */}
       <section className="py-12 bg-white border-b border-neutral-100 select-none overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative group/carousel">
-          <span className="text-[9px] font-black uppercase tracking-[0.25em] text-brand-gold bg-brand-black px-2.5 py-1 rounded-md inline-block mb-2">
+          <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white bg-black px-2.5 py-1 rounded-md inline-block mb-2">
             Trending Categories
           </span>
           <h2 className="font-display text-2xl sm:text-3xl font-black text-brand-black tracking-tight uppercase">
@@ -482,7 +482,7 @@ export default function App() {
             {/* Left manual slide action */}
             <button
               onClick={handlePrevColSlide}
-              className="absolute left-0 z-20 h-10 w-10 rounded-full bg-brand-black text-white hover:bg-brand-gold hover:text-brand-black flex items-center justify-center shadow-md transition-all hover:scale-105 border border-brand-black/5 cursor-pointer"
+              className="absolute left-0 z-20 h-10 w-10 rounded-full bg-black text-white hover:bg-neutral-800 flex items-center justify-center shadow-md transition-all hover:scale-105 border border-white/10 cursor-pointer"
               title="Slide Left"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -546,7 +546,7 @@ export default function App() {
             {/* Right manual slide action */}
             <button
               onClick={handleNextColSlide}
-              className="absolute right-0 z-20 h-10 w-10 rounded-full bg-brand-black text-white hover:bg-brand-gold hover:text-brand-black flex items-center justify-center shadow-md transition-all hover:scale-105 border border-brand-black/5 cursor-pointer"
+              className="absolute right-0 z-20 h-10 w-10 rounded-full bg-black text-white hover:bg-neutral-800 flex items-center justify-center shadow-md transition-all hover:scale-105 border border-white/10 cursor-pointer"
               title="Slide Right"
             >
               <ChevronRight className="h-5 w-5" />
@@ -573,7 +573,7 @@ export default function App() {
             </div>
             
             <div className="flex items-center gap-3 bg-black border border-neutral-900 p-3 rounded-xl shadow-md self-stretch lg:self-auto text-white">
-              <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest font-mono shrink-0 pl-1">
+              <span className="text-[10px] font-black text-zinc-200 uppercase tracking-widest font-mono shrink-0 pl-1">
                 ⚡ FLASH DEAL ENDS IN:
               </span>
               <div className="flex items-center gap-1 font-mono font-bold text-xs">
@@ -665,7 +665,7 @@ export default function App() {
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
               <div>
-                <span className="text-[10px] font-black tracking-widest text-blue-600 uppercase font-mono">SWEET DEALS • 30% OFF</span>
+                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">SWEET DEALS • 30% OFF</span>
                 <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">New Arrivals</h2>
               </div>
               <button 
@@ -693,7 +693,7 @@ export default function App() {
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
               <div>
-                <span className="text-[10px] font-black tracking-widest text-amber-500 uppercase font-mono">MOST POPULAR • LOVED BY MOMS</span>
+                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">MOST POPULAR • LOVED BY MOMS</span>
                 <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Best Sellers</h2>
               </div>
               <button 
@@ -721,7 +721,7 @@ export default function App() {
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
               <div>
-                <span className="text-[10px] font-black tracking-widest text-emerald-600 uppercase font-mono">DURABLE COTTON & WASHED DENIM</span>
+                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">DURABLE COTTON & WASHED DENIM</span>
                 <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Shorts & Pants</h2>
               </div>
               <button 
@@ -743,7 +743,7 @@ export default function App() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
                 
                 <div className="relative z-10 text-left space-y-3">
-                  <span className="bg-emerald-500 text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                  <span className="bg-white text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-white/10">
                     FLAT 30% OFF
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
@@ -755,7 +755,7 @@ export default function App() {
                   <div className="pt-2">
                     <button 
                       onClick={() => setActiveCategory('shorts-pants')}
-                      className="bg-white text-black hover:bg-emerald-400 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                      className="bg-white text-black hover:bg-zinc-100 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
                     >
                       Shop Collection
                     </button>
@@ -782,7 +782,7 @@ export default function App() {
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
               <div>
-                <span className="text-[10px] font-black tracking-widest text-purple-600 uppercase font-mono">COZY DREAMS • WINTER SOFT JERSEY</span>
+                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">COZY DREAMS • WINTER SOFT JERSEY</span>
                 <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Nightsuits Collection</h2>
               </div>
               <button 
@@ -817,7 +817,7 @@ export default function App() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
                 
                 <div className="relative z-10 text-left space-y-3">
-                  <span className="bg-purple-500 text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                  <span className="bg-white text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-white/10">
                     SWEET COMFORT
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
@@ -829,7 +829,7 @@ export default function App() {
                   <div className="pt-2">
                     <button 
                       onClick={() => setActiveCategory('nightsuits')}
-                      className="bg-white text-black hover:bg-purple-400 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                      className="bg-white text-black hover:bg-zinc-100 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
                     >
                       Shop Cozy Wear
                     </button>
@@ -843,7 +843,7 @@ export default function App() {
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
               <div>
-                <span className="text-[10px] font-black tracking-widest text-amber-600 uppercase font-mono">BABY CARRY PODS, BAGS & LUXURY GIFTBOXES</span>
+                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">BABY CARRY PODS, BAGS & LUXURY GIFTBOXES</span>
                 <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Baby Essentials</h2>
               </div>
               <button 
@@ -865,7 +865,7 @@ export default function App() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
                 
                 <div className="relative z-10 text-left space-y-3">
-                  <span className="bg-amber-500 text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                  <span className="bg-white text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-white/10">
                     MUST-HAVE SETS
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
@@ -877,7 +877,7 @@ export default function App() {
                   <div className="pt-2">
                     <button 
                       onClick={() => setActiveCategory('essentials')}
-                      className="bg-white text-black hover:bg-amber-400 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                      className="bg-white text-black hover:bg-zinc-100 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
                     >
                       Shop Essentials
                     </button>
@@ -906,14 +906,14 @@ export default function App() {
       {/* 5. Why Choose The Sweet Baby Shop Trust Section */}
       <section className="bg-neutral-50/50 py-16 border-t border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
-          <span className="text-xs font-bold tracking-[0.15em] text-blue-500 font-mono uppercase block mb-1">Our Standard Values</span>
+          <span className="text-xs font-bold tracking-[0.15em] text-neutral-500 font-mono uppercase block mb-1">Our Standard Values</span>
           <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight">Why Shop With Us?</h2>
           
           {/* Bento grid layout items */}
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 text-left">
             
             <div className="bg-white p-6 rounded-xl border border-neutral-100 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-sm">
-              <div className="rounded-full bg-blue-50 text-blue-600 h-11 w-11 flex items-center justify-center mb-4">
+              <div className="rounded-full bg-zinc-100 text-black h-11 w-11 flex items-center justify-center mb-4">
                 <ShieldCheck className="h-5.5 w-5.5" />
               </div>
               <h4 className="text-sm font-bold text-neutral-900 tracking-tight">Premium Cotton Care</h4>
@@ -921,7 +921,7 @@ export default function App() {
             </div>
 
             <div className="bg-white p-6 rounded-xl border border-neutral-100 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-sm">
-              <div className="rounded-full bg-blue-50 text-blue-600 h-11 w-11 flex items-center justify-center mb-4 font-bold text-base font-mono">
+              <div className="rounded-full bg-zinc-100 text-black h-11 w-11 flex items-center justify-center mb-4 font-bold text-base font-mono">
                 Rs.
               </div>
               <h4 className="text-sm font-bold text-neutral-900 tracking-tight">Honest Factory Rates</h4>
@@ -929,7 +929,7 @@ export default function App() {
             </div>
 
             <div className="bg-white p-6 rounded-xl border border-neutral-100 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-sm">
-              <div className="rounded-full bg-purple-50 text-purple-600 h-11 w-11 flex items-center justify-center mb-4">
+              <div className="rounded-full bg-zinc-100 text-black h-11 w-11 flex items-center justify-center mb-4">
                 <Clock className="h-5.5 w-5.5" />
               </div>
               <h4 className="text-sm font-bold text-neutral-900 tracking-tight">Loving WhatsApp Support</h4>
@@ -937,7 +937,7 @@ export default function App() {
             </div>
 
             <div className="bg-white p-6 rounded-xl border border-neutral-100 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-sm">
-              <div className="rounded-full bg-amber-50 text-amber-600 h-11 w-11 flex items-center justify-center mb-4">
+              <div className="rounded-full bg-zinc-100 text-black h-11 w-11 flex items-center justify-center mb-4">
                 <Sparkles className="h-5.5 w-5.5" />
               </div>
               <h4 className="text-sm font-bold text-neutral-900 tracking-tight">Handpicked Boutique Sets</h4>
@@ -945,7 +945,7 @@ export default function App() {
             </div>
 
             <div className="bg-white p-6 rounded-xl border border-neutral-100 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:shadow-sm">
-              <div className="rounded-full bg-rose-50 text-rose-600 h-11 w-11 flex items-center justify-center mb-4">
+              <div className="rounded-full bg-zinc-100 text-black h-11 w-11 flex items-center justify-center mb-4">
                 <Truck className="h-5.5 w-5.5" />
               </div>
               <h4 className="text-sm font-bold text-neutral-900 tracking-tight">Rapid Pakistan Shipping</h4>
@@ -961,7 +961,7 @@ export default function App() {
         
         {/* Story Text left */}
         <div className="md:col-span-7 space-y-6">
-          <span className="text-xs font-bold tracking-[0.15em] text-blue-600 uppercase font-mono">Our Beautiful Story</span>
+          <span className="text-xs font-bold tracking-[0.15em] text-neutral-500 uppercase font-mono">Our Beautiful Story</span>
           <h2 className="font-display text-3xl sm:text-4xl font-black text-neutral-950 leading-tight tracking-tight">
             Nurturing Soft Cuddles & Happy Little Smiles
           </h2>
@@ -971,7 +971,7 @@ export default function App() {
           <p className="text-sm text-neutral-600 leading-relaxed">
             From playful matching shorts sets to winter nightsuits and dazzling kids jewelry packs, we believe every child deserves boutique luxury combined with honest pricing. We carefully handpick our combed-cotton lines to avoid synthetic irritations.
           </p>
-          <p className="text-sm text-neutral-800 font-bold leading-relaxed border-l-4 border-blue-600 pl-4">
+          <p className="text-sm text-neutral-800 font-bold leading-relaxed border-l-4 border-black pl-4">
             We focus on softness, trust, and loving customer care, making us a household favorite for families across all regions of Pakistan.
           </p>
         </div>
@@ -981,7 +981,7 @@ export default function App() {
           {/* Mission */}
           <div className="bg-white border border-neutral-100 p-6 rounded-2xl shadow-xs">
             <div className="flex gap-4">
-              <div className="h-10 w-10 rounded-xl bg-blue-600 text-white shrink-0 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-black text-white shrink-0 flex items-center justify-center">
                 <Award className="h-5.5 w-5.5" />
               </div>
               <div>
@@ -996,7 +996,7 @@ export default function App() {
           {/* Vision */}
           <div className="bg-white border border-neutral-100 p-6 rounded-2xl shadow-xs">
             <div className="flex gap-4">
-              <div className="h-10 w-10 rounded-xl bg-amber-500 text-white shrink-0 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-black text-white shrink-0 flex items-center justify-center">
                 <Gem className="h-5.5 w-5.5" />
               </div>
               <div>
@@ -1011,11 +1011,11 @@ export default function App() {
           {/* Dynamic statistics numbers */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-neutral-50 p-4 rounded-xl border border-neutral-100 text-center">
-              <span className="font-mono text-xl sm:text-2xl font-black text-blue-600">500+</span>
+              <span className="font-mono text-xl sm:text-2xl font-black text-black">500+</span>
               <p className="text-[10px] text-neutral-500 font-bold uppercase mt-1">Stitch Patterns</p>
             </div>
             <div className="bg-neutral-50 p-4 rounded-xl border border-neutral-100 text-center">
-              <span className="font-mono text-xl sm:text-2xl font-black text-blue-600">10,000+</span>
+              <span className="font-mono text-xl sm:text-2xl font-black text-black">10,000+</span>
               <p className="text-[10px] text-neutral-500 font-bold uppercase mt-1">Happy Babies</p>
             </div>
           </div>
@@ -1026,16 +1026,16 @@ export default function App() {
       {/* 7. Standalone Customer Reviews Banner */}
       <section className="bg-neutral-950 py-16 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="text-xs font-bold tracking-[0.2em] text-blue-400 uppercase font-mono">Verified Testimonials</span>
+          <span className="text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase font-mono">Verified Testimonials</span>
           <h2 className="font-display text-2xl sm:text-3xl font-black mt-1 text-white">What Happy Moms Say</h2>
           
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
             {REVIEWS.map((rev) => (
               <div key={rev.id} className="bg-zinc-900 border border-white/5 p-6 rounded-2xl text-left flex flex-col justify-between shadow-lg">
                 <div>
-                  <div className="flex text-amber-500 gap-0.5">
+                  <div className="flex text-white gap-0.5">
                     {Array.from({ length: rev.rating }).map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-current text-amber-500" />
+                      <Star key={i} className="h-4 w-4 fill-current text-white" />
                     ))}
                   </div>
                   <p className="text-zinc-300 text-xs italic mt-4 leading-relaxed font-medium">
@@ -1059,7 +1059,7 @@ export default function App() {
         {/* left column coordinates address details info */}
         <div className="md:col-span-5 bg-white border border-neutral-200 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm">
           <div className="flex items-center gap-2.5">
-            <Phone className="h-5.5 w-5.5 text-blue-600" />
+            <Phone className="h-5.5 w-5.5 text-black" />
             <h3 className="font-display text-lg font-bold text-neutral-900 uppercase tracking-tight">Contact Desk</h3>
           </div>
           
@@ -1080,7 +1080,7 @@ export default function App() {
               <Phone className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Call Line Support:</h4>
-                <div className="space-y-1 mt-1 font-mono text-xs font-extrabold text-blue-600">
+                <div className="space-y-1 mt-1 font-mono text-xs font-extrabold text-neutral-800">
                   <a href="tel:+9233426533873" className="hover:underline block">
                     +92 334 26533873
                   </a>
@@ -1095,7 +1095,7 @@ export default function App() {
               <Mail className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Official Email:</h4>
-                <a href="mailto:support@thesweetbabyshop.com" className="text-xs font-extrabold text-blue-600 hover:underline mt-1 block font-mono">
+                <a href="mailto:support@thesweetbabyshop.com" className="text-xs font-extrabold text-neutral-800 hover:underline mt-1 block font-mono">
                   support@thesweetbabyshop.com
                 </a>
               </div>
@@ -1111,10 +1111,10 @@ export default function App() {
           </div>
 
           {/* Simple neat map graphic mock */}
-          <div className="h-28 bg-blue-50/40 border border-blue-100 rounded-xl overflow-hidden relative flex items-center justify-center p-3">
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#2563eb_1px,transparent_1px)] [background-size:16px_16px]" />
+          <div className="h-28 bg-neutral-50 border border-neutral-200 rounded-xl overflow-hidden relative flex items-center justify-center p-3">
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]" />
             <div className="relative text-center">
-              <MapPin className="h-5 w-5 text-blue-600 mx-auto mb-1 animate-bounce" />
+              <MapPin className="h-5 w-5 text-black mx-auto mb-1 animate-bounce" />
               <span className="text-[10px] uppercase font-bold text-neutral-900 tracking-wider block">Liaquatabad Karachi</span>
               <span className="text-[8px] text-neutral-500 font-mono mt-0.5 block">24.9080° N, 67.0423° E</span>
             </div>
@@ -1136,7 +1136,7 @@ export default function App() {
                   onChange={(e) => setInquiryName(e.target.value)}
                   placeholder="Enter full name"
                   required
-                  className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-blue-600 focus:outline-hidden font-bold text-neutral-900"
+                  className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-bold text-neutral-900"
                 />
               </div>
 
@@ -1148,7 +1148,7 @@ export default function App() {
                   onChange={(e) => setInquiryPhone(e.target.value)}
                   placeholder="e.g. 033426533873"
                   required
-                  className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-blue-600 focus:outline-hidden font-mono font-bold text-neutral-900"
+                  className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-mono font-bold text-neutral-900"
                 />
               </div>
             </div>
@@ -1161,14 +1161,14 @@ export default function App() {
                 onChange={(e) => setInquiryMessage(e.target.value)}
                 placeholder="Describe baby height/weight or custom garment combinations required..."
                 required
-                className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-blue-600 focus:outline-hidden font-bold text-neutral-900"
+                className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-bold text-neutral-900"
               />
             </div>
 
             <button
               type="submit"
               disabled={inquirySubmitted}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wider uppercase py-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full bg-black hover:bg-neutral-900 text-white font-bold text-xs tracking-wider uppercase py-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               {inquirySubmitted ? (
                 <>Loading...</>
@@ -1203,7 +1203,7 @@ export default function App() {
 
           {/* Links Quick column */}
           <div className="md:col-span-3 space-y-4">
-            <h4 className="font-display text-xs font-black uppercase tracking-wider text-blue-400">Shop Collections</h4>
+            <h4 className="font-display text-xs font-black uppercase tracking-wider text-zinc-200">Shop Collections</h4>
             <div className="flex flex-col gap-2 text-zinc-400 text-xs">
               {CATEGORIES.slice(0, 4).map((c) => (
                 <button 
@@ -1225,15 +1225,15 @@ export default function App() {
             <h4 className="font-display text-xs font-black uppercase tracking-wider text-white">Trust Badges</h4>
             <div className="space-y-3 pt-1 text-zinc-400 font-sans">
               <p className="flex items-center gap-2.5">
-                <Truck className="h-4.5 w-4.5 shrink-0 text-blue-400" />
+                <Truck className="h-4.5 w-4.5 shrink-0 text-zinc-400" />
                 <span>Nationwide Pakistan Delivery COD</span>
               </p>
               <p className="flex items-center gap-2.5">
-                <ShieldCheck className="h-4.5 w-4.5 shrink-0 text-amber-500" />
+                <ShieldCheck className="h-4.5 w-4.5 shrink-0 text-zinc-400" />
                 <span>Non-Allergenic 100% Baby Cotton Verified</span>
               </p>
               <p className="flex items-center gap-2.5">
-                <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-blue-400" />
+                <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-zinc-400" />
                 <span>Guaranteed Direct Factory Rates</span>
               </p>
             </div>
@@ -1256,7 +1256,7 @@ export default function App() {
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-left">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <span className="h-2 w-2 rounded-full bg-zinc-400 animate-pulse"></span>
                 <span className="text-white font-bold uppercase tracking-wider text-[10px]">Database Connection Status</span>
               </div>
               <p className="text-zinc-400 text-[10px]">
@@ -1269,7 +1269,7 @@ export default function App() {
             
             <button
               onClick={() => setIsManagerOpen(true)}
-              className="px-4 py-2 bg-blue-500 text-black text-[10px] font-extrabold uppercase rounded-xl hover:bg-blue-600 transition-colors shrink-0 tracking-wide cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 bg-white text-black text-[10px] font-extrabold uppercase rounded-xl hover:bg-zinc-100 transition-colors shrink-0 tracking-wide cursor-pointer flex items-center gap-1.5"
             >
               🔐 Admin Panel & CRM Access
             </button>
@@ -1360,6 +1360,8 @@ export default function App() {
             onSaveProducts={saveProductsToStorage}
             slides={slides}
             onSaveSlides={saveSlidesToStorage}
+            sessionOrders={orders}
+            onSimulateStatus={handleSimulateStatus}
           />
         )}
       </AnimatePresence>

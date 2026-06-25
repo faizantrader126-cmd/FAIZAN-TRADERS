@@ -86,9 +86,9 @@ export default function OrderTrackerModal({
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-sm font-bold text-black">{ord.id}</span>
                           <span className={`text-[10px] uppercase tracking-wider font-mono font-bold px-2 py-0.5 rounded-md ${
-                            ord.status === 'Pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                            ord.status === 'Shipped' ? 'bg-blue-50 text-blue-700 border border-blue-200 animate-pulse' :
-                            'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            ord.status === 'Pending' ? 'bg-neutral-100 text-neutral-800 border border-neutral-200' :
+                            ord.status === 'Shipped' ? 'bg-zinc-100 text-zinc-900 border border-zinc-200 animate-pulse' :
+                            'bg-black text-white border border-black'
                           }`}>
                             {ord.status}
                           </span>
@@ -185,7 +185,7 @@ export default function OrderTrackerModal({
                           onClick={() => onSimulateStatus(ord.id)}
                           className="bg-black hover:bg-neutral-900 text-white font-bold text-[10px] px-3.5 py-1.5 rounded-lg font-mono uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer"
                         >
-                          <CheckCircle2 className="h-3.5 w-3.5 text-amber-500 animate-bounce" />
+                          <CheckCircle2 className="h-3.5 w-3.5 text-zinc-400 animate-bounce" />
                           Simulate Speed Cargo Deliver
                         </button>
                       </div>
