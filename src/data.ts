@@ -132,6 +132,57 @@ export const PRODUCTS: Product[] = [
     stock: 20,
     badge: 'Hotel Grade'
   },
+  {
+    id: 'embroidered-bridal-bedsheet',
+    name: 'Embroidered Luxury Bridal Bedsheet Set',
+    price: 4499,
+    originalPrice: 6500,
+    description: 'Breathtaking heavy silk-embroidered bridal king size bedsheet with matching pillowcases & cushion covers.',
+    longDescription: 'Our signature bridal collection sheet is stitched with ultimate precision. It features beautiful heavy floral tilla and silk embroidery along the borders and pillow accents. Includes 1 King sheet, 2 Embroidered pillowcases, 2 Textured cushion covers, and 1 pristine bolster cover.',
+    image: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600',
+    rating: 4.9,
+    reviewsCount: 46,
+    category: 'bedsheet',
+    features: ['Premium Silk-Cotton blend fabric', 'Exquisite heavy border embroidery', 'Perfect luxury look for weddings', 'Includes 5 matching pillow/cushion cases'],
+    variants: ['Golden Ivory', 'Royal Crimson Red', 'Muted Plum'],
+    sizes: ['Double King Size'],
+    stock: 8,
+    badge: 'Bridal Luxe'
+  },
+  {
+    id: 'boho-mandala-bedsheet',
+    name: 'Bohemian Mandala Cotton Bedsheet',
+    price: 1999,
+    originalPrice: 2800,
+    description: 'Chic bohemian styled mandala print luxury cotton double bedsheet with matching cushion cases.',
+    longDescription: 'Bring positive, artistic energy to your bedroom. Features premium organic long-staple cotton printed with safe organic vegetable dyes in beautiful geometric boho mandala patterns. Feels incredibly smooth on the skin and brightens up any interior instantly.',
+    image: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=600',
+    rating: 4.7,
+    reviewsCount: 32,
+    category: 'bedsheet',
+    features: ['100% Pure Organic Cotton', 'Eco-friendly non-toxic vegetable dyes', 'Super-soft combed cotton touch', 'Includes 2 matching printed pillow covers'],
+    variants: ['Turquoise Sunset', 'Earthy Mustard', 'Monochrome Charcoal'],
+    sizes: ['Double King Size', 'Single Bed Size'],
+    stock: 18,
+    badge: '100% Cotton'
+  },
+  {
+    id: 'soft-flannel-bedsheet',
+    name: 'Cozy Flannel Thermal Winter Bedsheet',
+    price: 2799,
+    originalPrice: 3800,
+    description: 'Super warm brushed flannel cotton thermal bedsheet set, designed for cold winter nights.',
+    longDescription: 'Stay incredibly cozy and warm during breezy cold winter nights. Made of high-grade double brushed heavy flannel cotton that locks in body warmth while remaining completely breathable. Soft fuzzy texture feels amazing to cuddle in.',
+    image: 'https://images.unsplash.com/photo-1505693395321-883724634266?auto=format&fit=crop&q=80&w=600',
+    rating: 4.9,
+    reviewsCount: 29,
+    category: 'bedsheet',
+    features: ['Double-brushed heavy thermal flannel', 'Locks in warmth efficiently', 'Anti-pilling velvet texture treatment', 'Includes 2 warm fuzzy pillowcases'],
+    variants: ['Alpine Red Plaid', 'Silver Grey Pine', 'Winter Navy Star'],
+    sizes: ['Double King Size'],
+    stock: 14,
+    badge: 'Winter Cozy'
+  },
 
   // --- CLOTH MEN & WOMEN ---
   {

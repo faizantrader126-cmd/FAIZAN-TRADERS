@@ -4,9 +4,10 @@ import { CATEGORIES } from '../data';
 import { 
   X, Search, Plus, Edit2, Trash2, RotateCcw, Save, 
   ArrowLeft, Image, Check, AlertTriangle, Layers, Info, Sparkles, Upload,
-  TrendingUp, Coins, Database, MailOpen, LayoutDashboard, Eye, Lock, Unlock, Loader2, ExternalLink, Trash
+  TrendingUp, Coins, Database, MailOpen, LayoutDashboard, Eye, Lock, Unlock, Loader2, ExternalLink, Trash, Palette
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { getSavedTheme, saveAndApplyTheme, THEME_PRESETS, ThemeConfig } from '../lib/theme';
 
 
 interface ProductManagerModalProps {
@@ -155,7 +156,27 @@ export default function ProductManagerModal({
   const [signupPass, setSignupPass] = useState('');
 
   // Primary active Admin tab view
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'slides' | 'orders' | 'inquiries' | 'settings' | 'session_orders'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'slides' | 'orders' | 'inquiries' | 'settings' | 'session_orders' | 'theme_settings'>('dashboard');
+
+  // Dynamic Live Theme Designer state variables
+  const [themeId, setThemeId] = useState<string>(() => {
+    return getSavedTheme().id;
+  });
+  const [brandBlackColor, setBrandBlackColor] = useState<string>(() => {
+    return getSavedTheme().brandBlack;
+  });
+  const [brandCharcoalColor, setBrandCharcoalColor] = useState<string>(() => {
+    return getSavedTheme().brandCharcoal;
+  });
+  const [brandOffwhiteColor, setBrandOffwhiteColor] = useState<string>(() => {
+    return getSavedTheme().brandOffwhite;
+  });
+  const [brandLightgrayColor, setBrandLightgrayColor] = useState<string>(() => {
+    return getSavedTheme().brandLightgray;
+  });
+  const [brandGoldColor, setBrandGoldColor] = useState<string>(() => {
+    return getSavedTheme().brandGold;
+  });
 
   const [customLogo, setCustomLogo] = useState<string>(() => {
     return localStorage.getItem('custom_store_logo') || '';
@@ -910,6 +931,18 @@ export default function ProductManagerModal({
           >
             <Layers className="h-4 w-4 text-orange-400" />
             <span>⚙️ Logo Settings</span>
+          </button>
+
+          <button
+            onClick={() => { setActiveTab('theme_settings'); setCurrentView('list'); }}
+            className={`px-3 py-2.5 text-xs font-semibold tracking-wider flex items-center gap-1.5 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === 'theme_settings' && !isFormActive && currentView !== 'slides'
+                ? 'border-brand-gold text-white font-extrabold' 
+                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Palette className="h-4 w-4 text-emerald-400 animate-pulse" />
+            <span>🎨 Edit Theme / Colors</span>
           </button>
 
           <button
@@ -1770,6 +1803,318 @@ CREATE TABLE IF NOT EXISTS orders (
                   })}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* VIEW: THEME CUSTOMIZATION DESIGNER */}
+          {currentView === 'list' && activeTab === 'theme_settings' && !isFormActive && (
+            <div className="bg-white border border-brand-black/5 rounded-2xl p-6 shadow-xs max-w-4xl mx-auto space-y-8 animate-fade-in text-black">
+              <div className="border-b border-brand-black/5 pb-4">
+                <h3 className="font-display font-extrabold text-sm uppercase tracking-wider text-brand-black">🎨 Live Theme & Color Designer</h3>
+                <p className="text-[10px] text-zinc-500 font-medium">Select a premium curated color palette, or manually craft your custom brand identity with precision color pickers below. Updates apply to all views instantly.</p>
+              </div>
+
+              {/* SECTION 1: PRESET PALETTES */}
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">1. Select a Curated Preset</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {THEME_PRESETS.map((preset) => {
+                    const isSelected = themeId === preset.id;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => {
+                          setThemeId(preset.id);
+                          setBrandBlackColor(preset.brandBlack);
+                          setBrandCharcoalColor(preset.brandCharcoal);
+                          setBrandOffwhiteColor(preset.brandOffwhite);
+                          setBrandLightgrayColor(preset.brandLightgray);
+                          setBrandGoldColor(preset.brandGold);
+                        }}
+                        className={`p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between h-28 hover:scale-[1.01] cursor-pointer ${
+                          isSelected 
+                            ? 'border-brand-black ring-2 ring-brand-black bg-neutral-50/50' 
+                            : 'border-neutral-200 hover:border-neutral-400 bg-white'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start w-full text-black">
+                          <span className="text-xs font-bold pr-2">{preset.name}</span>
+                          {isSelected && (
+                            <span className="bg-brand-black text-white text-[8px] font-black uppercase px-2 py-0.5 rounded font-mono shrink-0">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Preset preview bubbles */}
+                        <div className="flex items-center gap-2 mt-4">
+                          <div className="flex -space-x-1.5 overflow-hidden">
+                            <span className="inline-block h-6 w-6 rounded-full border border-white" style={{ backgroundColor: preset.brandBlack }} title="Brand Primary" />
+                            <span className="inline-block h-6 w-6 rounded-full border border-white" style={{ backgroundColor: preset.brandCharcoal }} title="Brand Secondary" />
+                            <span className="inline-block h-6 w-6 rounded-full border border-white" style={{ backgroundColor: preset.brandOffwhite }} title="Canvas Background" />
+                            <span className="inline-block h-6 w-6 rounded-full border border-white" style={{ backgroundColor: preset.brandLightgray }} title="Highlights" />
+                            <span className="inline-block h-6 w-6 rounded-full border border-white" style={{ backgroundColor: preset.brandGold }} title="Special Accent" />
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* SECTION 2: CUSTOM COLOR SLIDERS / PICKERS */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pt-4 border-t border-brand-black/5">
+                
+                {/* Left: Inputs */}
+                <div className="md:col-span-7 space-y-5">
+                  <h4 className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono text-black">2. Fine-Tune Custom Tones</h4>
+                  
+                  <div className="space-y-4">
+                    {/* Color 1: Primary Brand Accent */}
+                    <div className="flex items-center justify-between gap-4 p-3 bg-neutral-50 rounded-xl border border-neutral-100">
+                      <div className="space-y-0.5 text-left">
+                        <label className="text-[10px] font-extrabold text-zinc-900 uppercase font-mono tracking-wider">Primary Accent Color</label>
+                        <p className="text-[9px] text-zinc-500">For main buttons, headers, and footer background.</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <input
+                          type="text"
+                          value={brandBlackColor}
+                          onChange={(e) => {
+                            setBrandBlackColor(e.target.value);
+                            setThemeId('custom');
+                          }}
+                          className="w-20 bg-white border border-neutral-200 text-center font-mono text-[10px] uppercase font-bold py-1.5 rounded-lg focus:outline-hidden text-black"
+                        />
+                        <input
+                          type="color"
+                          value={brandBlackColor}
+                          onChange={(e) => {
+                            setBrandBlackColor(e.target.value);
+                            setThemeId('custom');
+                          }}
+                          className="h-9 w-9 border-0 cursor-pointer rounded-lg overflow-hidden shrink-0"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Color 2: Charcoal Shadow */}
+                    <div className="flex items-center justify-between gap-4 p-3 bg-neutral-50 rounded-xl border border-neutral-100">
+                      <div className="space-y-0.5 text-left">
+                        <label className="text-[10px] font-extrabold text-zinc-900 uppercase font-mono tracking-wider">Secondary Contrast Color</label>
+                        <p className="text-[9px] text-zinc-500">For secondary headers, alerts, and navigation accents.</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <input
+                          type="text"
+                          value={brandCharcoalColor}
+                          onChange={(e) => {
+                            setBrandCharcoalColor(e.target.value);
+                            setThemeId('custom');
+                          }}
+                          className="w-20 bg-white border border-neutral-200 text-center font-mono text-[10px] uppercase font-bold py-1.5 rounded-lg focus:outline-hidden text-black"
+                        />
+                        <input
+                          type="color"
+                          value={brandCharcoalColor}
+                          onChange={(e) => {
+                            setBrandCharcoalColor(e.target.value);
+                            setThemeId('custom');
+                          }}
+                          className="h-9 w-9 border-0 cursor-pointer rounded-lg overflow-hidden shrink-0"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Color 3: Canvas Offwhite Background */}
+                    <div className="flex items-center justify-between gap-4 p-3 bg-neutral-50 rounded-xl border border-neutral-100">
+                      <div className="space-y-0.5 text-left">
+                        <label className="text-[10px] font-extrabold text-zinc-900 uppercase font-mono tracking-wider">Store Canvas Background</label>
+                        <p className="text-[9px] text-zinc-500">The main page background of your entire storefront website.</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <input
+                          type="text"
+                          value={brandOffwhiteColor}
+                          onChange={(e) => {
+                            setBrandOffwhiteColor(e.target.value);
+                            setThemeId('custom');
+                          }}
+                          className="w-20 bg-white border border-neutral-200 text-center font-mono text-[10px] uppercase font-bold py-1.5 rounded-lg focus:outline-hidden text-black"
+                        />
+                        <input
+                          type="color"
+                          value={brandOffwhiteColor}
+                          onChange={(e) => {
+                            setBrandOffwhiteColor(e.target.value);
+                            setThemeId('custom');
+                          }}
+                          className="h-9 w-9 border-0 cursor-pointer rounded-lg overflow-hidden shrink-0"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Color 4: Lightgray Card Background */}
+                    <div className="flex items-center justify-between gap-4 p-3 bg-neutral-50 rounded-xl border border-neutral-100">
+                      <div className="space-y-0.5 text-left">
+                        <label className="text-[10px] font-extrabold text-zinc-900 uppercase font-mono tracking-wider">Highlight & Border Tone</label>
+                        <p className="text-[9px] text-zinc-500">Used for product cards backdrops, input borders and grid lines.</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <input
+                          type="text"
+                          value={brandLightgrayColor}
+                          onChange={(e) => {
+                            setBrandLightgrayColor(e.target.value);
+                            setThemeId('custom');
+                          }}
+                          className="w-20 bg-white border border-neutral-200 text-center font-mono text-[10px] uppercase font-bold py-1.5 rounded-lg focus:outline-hidden text-black"
+                        />
+                        <input
+                          type="color"
+                          value={brandLightgrayColor}
+                          onChange={(e) => {
+                            setBrandLightgrayColor(e.target.value);
+                            setThemeId('custom');
+                          }}
+                          className="h-9 w-9 border-0 cursor-pointer rounded-lg overflow-hidden shrink-0"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Color 5: Gold Deal Glow Accent */}
+                    <div className="flex items-center justify-between gap-4 p-3 bg-neutral-50 rounded-xl border border-neutral-100">
+                      <div className="space-y-0.5 text-left">
+                        <label className="text-[10px] font-extrabold text-zinc-900 uppercase font-mono tracking-wider">Special Glow Accent (Gold)</label>
+                        <p className="text-[9px] text-zinc-500">For sale countdown clocks, sparkles, action icons, and discount badges.</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <input
+                          type="text"
+                          value={brandGoldColor}
+                          onChange={(e) => {
+                            setBrandGoldColor(e.target.value);
+                            setThemeId('custom');
+                          }}
+                          className="w-20 bg-white border border-neutral-200 text-center font-mono text-[10px] uppercase font-bold py-1.5 rounded-lg focus:outline-hidden text-black"
+                        />
+                        <input
+                          type="color"
+                          value={brandGoldColor}
+                          onChange={(e) => {
+                            setBrandGoldColor(e.target.value);
+                            setThemeId('custom');
+                          }}
+                          className="h-9 w-9 border-0 cursor-pointer rounded-lg overflow-hidden shrink-0"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Live Interactive Card Preview */}
+                <div className="md:col-span-5 space-y-4">
+                  <h4 className="text-[10px] font-bold text-brand-black uppercase tracking-wider font-mono">3. Live Interface Preview</h4>
+                  
+                  <div 
+                    className="p-5 rounded-2xl border transition-all duration-300 relative shadow-sm"
+                    style={{ 
+                      backgroundColor: brandOffwhiteColor, 
+                      borderColor: `${brandBlackColor}15`,
+                      color: brandBlackColor 
+                    }}
+                  >
+                    <div className="absolute top-3 right-3 flex items-center gap-1 font-mono text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md" style={{ backgroundColor: `${brandGoldColor}20`, color: brandGoldColor }}>
+                      <Sparkles className="h-2.5 w-2.5" />
+                      <span>Live Preview</span>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="aspect-square w-full rounded-xl overflow-hidden bg-neutral-100 border relative group" style={{ borderColor: `${brandBlackColor}10` }}>
+                        <img 
+                          src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=400" 
+                          alt="Demo bedding" 
+                          className="w-full h-full object-cover"
+                        />
+                        <span 
+                          className="absolute bottom-2 left-2 text-[8px] font-mono font-black uppercase px-2 py-0.5 rounded-md text-white shadow-xs"
+                          style={{ backgroundColor: brandBlackColor }}
+                        >
+                          Sale Active
+                        </span>
+                      </div>
+
+                      <div className="text-left space-y-1">
+                        <span className="text-[8px] uppercase tracking-wider font-mono font-bold" style={{ color: brandGoldColor }}>
+                          Premium Bedding • Best Seller
+                        </span>
+                        <h5 className="font-display font-extrabold text-xs tracking-tight">Royal Embossed Luxury Sheet</h5>
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          <span className="font-mono text-xs font-black">Rs. 3,499</span>
+                          <span className="font-mono text-[9px] line-through text-zinc-400">Rs. 4,800</span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="w-full text-[10px] font-bold uppercase tracking-wider py-2 rounded-xl flex items-center justify-center gap-1.5 shadow-sm text-white cursor-pointer"
+                        style={{ backgroundColor: brandBlackColor }}
+                      >
+                        <Save className="h-3 w-3" style={{ color: brandGoldColor }} />
+                        <span>Add To Cart Bag</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <p className="text-[9px] text-zinc-500 font-medium text-center">Changes made here will be applied directly to all buttons, lists, layout bars and banners on Faizan Traders.</p>
+                </div>
+              </div>
+
+              {/* SAVE / RESET ACTIONS */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-brand-black/5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const confirmReset = window.confirm('Are you sure you want to restore the default classic gold & charcoal theme?');
+                    if (confirmReset) {
+                      const defaultTheme = THEME_PRESETS[0];
+                      setThemeId(defaultTheme.id);
+                      setBrandBlackColor(defaultTheme.brandBlack);
+                      setBrandCharcoalColor(defaultTheme.brandCharcoal);
+                      setBrandOffwhiteColor(defaultTheme.brandOffwhite);
+                      setBrandLightgrayColor(defaultTheme.brandLightgray);
+                      setBrandGoldColor(defaultTheme.brandGold);
+                      saveAndApplyTheme(defaultTheme);
+                      alert('Restored default classic theme successfully! ✨');
+                    }
+                  }}
+                  className="px-4 py-2.5 rounded-xl border border-red-200 text-red-750 hover:bg-red-50 hover:text-red-800 text-xs font-bold uppercase cursor-pointer tracking-wider"
+                >
+                  Reset Default Theme 🔄
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const themeObj: ThemeConfig = {
+                      id: themeId,
+                      name: themeId === 'custom' ? '🎨 Custom Dynamic Palette' : (THEME_PRESETS.find(p => p.id === themeId)?.name || 'Custom Theme'),
+                      brandBlack: brandBlackColor,
+                      brandCharcoal: brandCharcoalColor,
+                      brandOffwhite: brandOffwhiteColor,
+                      brandLightgray: brandLightgrayColor,
+                      brandGold: brandGoldColor
+                    };
+                    saveAndApplyTheme(themeObj);
+                    alert('Theme updated live successfully! ✨ All customers will experience your premium design changes in real-time.');
+                  }}
+                  className="flex-1 bg-brand-black hover:bg-zinc-800 text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                >
+                  <Save className="h-4 w-4 text-brand-gold" />
+                  <span>Save & Apply Selected Theme</span>
+                </button>
+              </div>
             </div>
           )}
 
