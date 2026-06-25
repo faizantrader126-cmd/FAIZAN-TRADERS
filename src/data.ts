@@ -98,6 +98,40 @@ export const PRODUCTS: Product[] = [
     stock: 15,
     badge: 'Premium'
   },
+  {
+    id: 'royal-velvet-bedsheet',
+    name: 'Royal Velvet Embossed King Bedsheet',
+    price: 3499,
+    originalPrice: 4800,
+    description: 'Ultra-luxurious soft touch embossed velvet king-size bedsheet set with beautiful lace-lined borders.',
+    longDescription: 'Experience imperial luxury right in your bedroom. This premium heavy embossed velvet bedsheet offers supreme warmth and an incredibly plush, silky feel. Perfect for bridal gifting or elegant winter setups. Includes 1 king sheet, 2 pillow covers, and 1 cushion cover.',
+    image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=600',
+    rating: 4.9,
+    reviewsCount: 38,
+    category: 'bedsheet',
+    features: ['Premium heavy velvet fabric', 'Beautiful luxury embossed self-design', 'Includes matching cushion cover & 2 pillowcases', 'Perfect warm luxury look'],
+    variants: ['Royal Maroon', 'Plush Navy Blue', 'Elegant Rose Gold'],
+    sizes: ['Double King Size'],
+    stock: 12,
+    badge: 'Luxury'
+  },
+  {
+    id: 'classic-stripe-bedsheet',
+    name: 'Classic Hotel Stripe King Bedsheet',
+    price: 2250,
+    originalPrice: 3200,
+    description: 'Luxury hotel quality satin stripe cotton bedsheet set, extremely soft and durable.',
+    longDescription: 'Bring the signature luxury of 5-star hotels home. Woven with exquisite combed cotton satin stripes, this sheet provides excellent cooling, sweat absorption, and a wonderfully crisp texture. Stays perfectly in place with heavy-duty elastic corners.',
+    image: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=600',
+    rating: 4.8,
+    reviewsCount: 57,
+    category: 'bedsheet',
+    features: ['5-Star Hotel grade combed cotton', 'Exquisite satin stripes weave', 'Highly breathable and cooling', 'Includes 2 striped pillow covers'],
+    variants: ['Snow White', 'Ice Blue', 'Pearl Grey'],
+    sizes: ['Double King Size', 'Queen Size'],
+    stock: 20,
+    badge: 'Hotel Grade'
+  },
 
   // --- CLOTH MEN & WOMEN ---
   {
