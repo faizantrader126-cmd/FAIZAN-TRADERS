@@ -638,6 +638,7 @@ export default function ProductManagerModal({
     if (!askReset) return;
 
     localStorage.removeItem('faizan_traders_products');
+    localStorage.removeItem('faizan_traders_deleted_products');
     window.location.reload();
   };
 

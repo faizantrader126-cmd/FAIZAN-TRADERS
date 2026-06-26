@@ -61,9 +61,22 @@ export default function App() {
       try { 
         const parsed = JSON.parse(saved) as Product[];
         if (Array.isArray(parsed)) {
-          // Merge missing default items (e.g. newly introduced categories/items)
+          // Merge missing default items (excluding those explicitly deleted by the admin)
+          const deletedSaved = localStorage.getItem('faizan_traders_deleted_products');
+          let deletedIdsSet = new Set<string>();
+          if (deletedSaved) {
+            try {
+              const parsedDeleted = JSON.parse(deletedSaved);
+              if (Array.isArray(parsedDeleted)) {
+                deletedIdsSet = new Set(parsedDeleted);
+              }
+            } catch (err) {
+              console.error(err);
+            }
+          }
+
           const existingIds = new Set(parsed.map(p => p.id));
-          const missing = PRODUCTS.filter(p => !existingIds.has(p.id));
+          const missing = PRODUCTS.filter(p => !existingIds.has(p.id) && !deletedIdsSet.has(p.id));
           if (missing.length > 0) {
             initialList = [...parsed, ...missing];
           } else {
@@ -105,6 +118,11 @@ export default function App() {
   const saveProductsToStorage = (updatedProducts: Product[]) => {
     setProducts(updatedProducts);
     localStorage.setItem('faizan_traders_products', JSON.stringify(updatedProducts));
+    
+    // Find which of the default products are missing/deleted
+    const remainingIds = new Set(updatedProducts.map(p => p.id));
+    const deletedDefaultIds = PRODUCTS.filter(p => !remainingIds.has(p.id)).map(p => p.id);
+    localStorage.setItem('faizan_traders_deleted_products', JSON.stringify(deletedDefaultIds));
   };
 
   // Dynamic Banners / Slideshow state loaded from LocalStorage or default BANNER_SLIDES
