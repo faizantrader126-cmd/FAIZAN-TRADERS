@@ -6,7 +6,7 @@ import {
   ArrowLeft, Image, Check, AlertTriangle, Layers, Info, Sparkles, Upload,
   TrendingUp, Coins, Database, MailOpen, LayoutDashboard, Eye, Lock, Unlock, Loader2, ExternalLink, Trash, Palette
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseUrl, supabaseKey } from '../lib/supabase';
 import { getSavedTheme, saveAndApplyTheme, THEME_PRESETS, ThemeConfig } from '../lib/theme';
 
 
@@ -181,6 +181,46 @@ export default function ProductManagerModal({
   const [customLogo, setCustomLogo] = useState<string>(() => {
     return localStorage.getItem('custom_store_logo') || '';
   });
+
+  // Custom Supabase Configuration States
+  const [supabaseUrlInput, setSupabaseUrlInput] = useState(() => {
+    return localStorage.getItem('custom_supabase_url') || '';
+  });
+  const [supabaseAnonKeyInput, setSupabaseAnonKeyInput] = useState(() => {
+    return localStorage.getItem('custom_supabase_anon_key') || '';
+  });
+  const [supabaseSaveStatus, setSupabaseSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  const handleSaveSupabaseConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supabaseUrlInput.trim() || !supabaseAnonKeyInput.trim()) {
+      alert("Please fill in both Supabase URL and Anon/Public Key.");
+      return;
+    }
+    setSupabaseSaveStatus('saving');
+    try {
+      localStorage.setItem('custom_supabase_url', supabaseUrlInput.trim());
+      localStorage.setItem('custom_supabase_anon_key', supabaseAnonKeyInput.trim());
+      setSupabaseSaveStatus('saved');
+      setTimeout(() => {
+        setSupabaseSaveStatus('idle');
+        window.location.reload();
+      }, 1200);
+    } catch (err) {
+      console.error(err);
+      setSupabaseSaveStatus('error');
+    }
+  };
+
+  const handleResetSupabaseConfig = () => {
+    if (window.confirm("Are you sure you want to reset to default Supabase settings?")) {
+      localStorage.removeItem('custom_supabase_url');
+      localStorage.removeItem('custom_supabase_anon_key');
+      setSupabaseUrlInput('');
+      setSupabaseAnonKeyInput('');
+      window.location.reload();
+    }
+  };
 
   // Supabase live records
   const [ordersDb, setOrdersDb] = useState<any[]>([]);
@@ -1220,9 +1260,75 @@ export default function ProductManagerModal({
               {/* Instructions and setup guide */}
               <div className="bg-brand-lightgray/50 border border-brand-black/5 rounded-2xl p-5 text-zinc-700 text-xs leading-relaxed space-y-4">
                 <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                  <h4 className="font-bold text-brand-black text-xs uppercase tracking-wider font-mono">Supabase Setup & Database Sync Blueprint</h4>
+                  <span className="h-2.5 w-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                  <h4 className="font-bold text-brand-black text-xs uppercase tracking-wider font-mono">Supabase Connection Settings</h4>
                 </div>
+
+                {/* Form to Connect Custom Supabase */}
+                <form onSubmit={handleSaveSupabaseConfig} className="bg-white border border-brand-black/5 p-4 rounded-xl space-y-3 font-sans">
+                  <p className="text-[11px] text-zinc-500 mb-2 leading-relaxed">
+                    Enter your own Supabase project details below to route all inquiries, bookings, and orders directly to your personal Supabase database!
+                  </p>
+                  
+                  <div className="space-y-1 text-left">
+                    <label className="text-[10px] uppercase font-bold text-zinc-500 block">Supabase Project URL</label>
+                    <input
+                      type="url"
+                      placeholder="e.g. https://your-project-id.supabase.co"
+                      value={supabaseUrlInput}
+                      onChange={(e) => setSupabaseUrlInput(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-zinc-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-1 text-left">
+                    <label className="text-[10px] uppercase font-bold text-zinc-500 block">Supabase Anon / Public API Key</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      value={supabaseAnonKeyInput}
+                      onChange={(e) => setSupabaseAnonKeyInput(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-zinc-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-2">
+                    <button
+                      type="submit"
+                      disabled={supabaseSaveStatus === 'saving'}
+                      className="px-4 py-2 bg-brand-black text-white rounded-xl text-xs font-semibold hover:bg-zinc-800 transition-colors flex items-center gap-1.5"
+                    >
+                      {supabaseSaveStatus === 'saving' ? (
+                        <>
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Connecting...
+                        </>
+                      ) : supabaseSaveStatus === 'saved' ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          Connected!
+                        </>
+                      ) : (
+                        <>
+                          <Database className="h-3.5 w-3.5" />
+                          Connect Supabase
+                        </>
+                      )}
+                    </button>
+
+                    {(localStorage.getItem('custom_supabase_url') || localStorage.getItem('custom_supabase_anon_key')) && (
+                      <button
+                        type="button"
+                        onClick={handleResetSupabaseConfig}
+                        className="px-3 py-2 bg-rose-50 text-rose-600 border border-rose-100 rounded-xl text-xs font-medium hover:bg-rose-100 transition-colors"
+                      >
+                        Reset to Defaults
+                      </button>
+                    )}
+                  </div>
+                </form>
 
                 {/* Explicit credentials details card */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] bg-white border border-brand-black/5 p-4 rounded-xl font-mono text-zinc-600">
@@ -1232,24 +1338,26 @@ export default function ProductManagerModal({
                   </div>
                   <div>
                     <span className="text-[10px] uppercase text-zinc-400 font-extrabold block">Supabase Project ID</span>
-                    <span className="text-zinc-800 font-bold">vwoqpxljyxqacadnpgfk</span>
+                    <span className="text-zinc-800 font-bold">
+                      {supabaseUrl ? (supabaseUrl.replace('https://', '').split('.')[0] || 'vwoqpxljyxqacadnpgfk') : 'vwoqpxljyxqacadnpgfk'}
+                    </span>
                   </div>
                   <div>
                     <span className="text-[10px] uppercase text-zinc-400 font-extrabold block">Supabase Rest Endpoint</span>
-                    <span className="text-zinc-500">https://vwoqpxljyxqacadnpgfk.supabase.co</span>
+                    <span className="text-zinc-500 truncate block">{supabaseUrl}</span>
                   </div>
                   <div>
                     <span className="text-[10px] uppercase text-zinc-400 font-extrabold block text-emerald-600">Sync Status Mode</span>
                     <span className="text-emerald-600 font-extrabold text-[10px] flex items-center gap-1">🟢 LIVE SECURED CONNECTION</span>
                   </div>
                   <div className="sm:col-span-2 pt-1 border-t border-brand-lightgray">
-                    <span className="text-[10px] uppercase text-zinc-400 font-bold block">My Publishable Key Configuration</span>
-                    <span className="text-[10px] font-mono break-all text-zinc-500 block">sb_publishable_8imO92Hxr2KGilgnAbNsVw_Dho4Vc9q</span>
+                    <span className="text-[10px] uppercase text-zinc-400 font-bold block">Active Anon Key Configuration</span>
+                    <span className="text-[10px] font-mono break-all text-zinc-500 block truncate">{supabaseKey}</span>
                   </div>
                 </div>
 
                 <p className="font-sans text-zinc-600">
-                  To receive and query bookings or purchases, please log in to your <strong>Supabase Dashboard (Project ID: vwoqpxljyxqacadnpgfk_publishable_key)</strong>, navigate to the <strong>SQL Editor</strong>, and paste the database tables schema below to create the required tables:
+                  To receive and query bookings or purchases, please log in to your <strong>Supabase Dashboard (Project ID: {supabaseUrl ? (supabaseUrl.replace('https://', '').split('.')[0] || 'vwoqpxljyxqacadnpgfk') : 'vwoqpxljyxqacadnpgfk'})</strong>, navigate to the <strong>SQL Editor</strong>, and paste the database tables schema below to create the required tables:
                 </p>
                 <pre className="p-3 bg-zinc-950 text-emerald-400 rounded-xl overflow-x-auto text-[10px] font-mono select-all leading-relaxed whitespace-pre font-medium shadow-inner max-h-48 border border-zinc-900 border-t-zinc-800">
 {`-- 1. Create Appointments Table

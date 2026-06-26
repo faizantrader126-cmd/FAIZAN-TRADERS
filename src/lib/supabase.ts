@@ -5,6 +5,13 @@ const getSupabaseConfig = () => {
   const defaultUrl = 'https://vwoqpxljyxqacadnpgfk.supabase.co';
   const defaultKey = 'sb_publishable_8imO92Hxr2KGilgnAbNsVw_Dho4Vc9q';
 
+  let localUrl = '';
+  let localKey = '';
+  if (typeof window !== 'undefined' && window.localStorage) {
+    localUrl = window.localStorage.getItem('custom_supabase_url') || '';
+    localKey = window.localStorage.getItem('custom_supabase_anon_key') || '';
+  }
+
   const envUrl = (import.meta as any).env?.VITE_SUPABASE_URL;
   const envKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
 
@@ -14,13 +21,13 @@ const getSupabaseConfig = () => {
     return trimmed.startsWith('http://') || trimmed.startsWith('https://');
   };
 
-  const finalUrl = isValidUrl(envUrl) ? envUrl.trim() : defaultUrl;
-  const finalKey = (typeof envKey === 'string' && envKey.trim() && !envKey.includes('placeholder')) ? envKey.trim() : defaultKey;
+  const finalUrl = isValidUrl(localUrl) ? localUrl.trim() : (isValidUrl(envUrl) ? envUrl.trim() : defaultUrl);
+  const finalKey = (typeof localKey === 'string' && localKey.trim()) ? localKey.trim() : ((typeof envKey === 'string' && envKey.trim() && !envKey.includes('placeholder')) ? envKey.trim() : defaultKey);
 
   return { url: finalUrl, key: finalKey };
 };
 
-const { url: supabaseUrl, key: supabaseKey } = getSupabaseConfig();
+export const { url: supabaseUrl, key: supabaseKey } = getSupabaseConfig();
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
