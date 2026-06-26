@@ -55,6 +55,7 @@ export default function App() {
 
   // Dynamic Products Inventory state loaded from LocalStorage or PRODUCTS defaults
   const [products, setProducts] = useState<Product[]>(() => {
+    let initialList = PRODUCTS;
     const saved = localStorage.getItem('faizan_traders_products');
     if (saved) {
       try { 
@@ -64,17 +65,41 @@ export default function App() {
           const existingIds = new Set(parsed.map(p => p.id));
           const missing = PRODUCTS.filter(p => !existingIds.has(p.id));
           if (missing.length > 0) {
-            const merged = [...parsed, ...missing];
-            localStorage.setItem('faizan_traders_products', JSON.stringify(merged));
-            return merged;
+            initialList = [...parsed, ...missing];
+          } else {
+            initialList = parsed;
           }
-          return parsed; 
         }
       } catch (e) { 
         console.error(e); 
       }
     }
-    return PRODUCTS;
+
+    // Synchronous self-healing for legacy glitched/corrupted images
+    let changed = false;
+    const sanitizedList = initialList.map(p => {
+      let itemChanged = false;
+      let img = p.image;
+      if (img && img.includes('photo-1522771739844-6a9f6d5f14af')) {
+        img = img.replace('photo-1522771739844-6a9f6d5f14af', p.id === 'embroidered-bridal-bedsheet' ? 'photo-1631679706909-1844bbd07221' : 'photo-1505693416388-ac5ce068fe85');
+        itemChanged = true;
+      }
+      let imgs = p.images;
+      if (imgs && imgs.some(url => url.includes('photo-1522771739844-6a9f6d5f14af'))) {
+        imgs = imgs.map(url => url.includes('photo-1522771739844-6a9f6d5f14af') ? url.replace('photo-1522771739844-6a9f6d5f14af', 'photo-1505693416388-ac5ce068fe85') : url);
+        itemChanged = true;
+      }
+      if (itemChanged) {
+        changed = true;
+        return { ...p, image: img, images: imgs };
+      }
+      return p;
+    });
+
+    if (changed || saved === null) {
+      localStorage.setItem('faizan_traders_products', JSON.stringify(sanitizedList));
+    }
+    return sanitizedList;
   });
 
   const saveProductsToStorage = (updatedProducts: Product[]) => {
@@ -84,16 +109,31 @@ export default function App() {
 
   // Dynamic Banners / Slideshow state loaded from LocalStorage or default BANNER_SLIDES
   const [slides, setSlides] = useState<BannerSlide[]>(() => {
+    let initialSlides = BANNER_SLIDES;
     const saved = localStorage.getItem('faizan_traders_slides');
     if (saved) {
       try { 
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          return parsed;
+          initialSlides = parsed;
         }
       } catch (e) { console.error(e); }
     }
-    return BANNER_SLIDES;
+
+    // Synchronous self-healing for legacy glitched/corrupted slide images
+    let slideChanged = false;
+    const sanitizedSlides = initialSlides.map(s => {
+      if (s.image && s.image.includes('photo-1522771739844-6a9f6d5f14af')) {
+        slideChanged = true;
+        return { ...s, image: s.image.replace('photo-1522771739844-6a9f6d5f14af', 'photo-1505693416388-ac5ce068fe85') };
+      }
+      return s;
+    });
+
+    if (slideChanged || saved === null) {
+      localStorage.setItem('faizan_traders_slides', JSON.stringify(sanitizedSlides));
+    }
+    return sanitizedSlides;
   });
 
   const saveSlidesToStorage = (updatedSlides: BannerSlide[]) => {
@@ -443,7 +483,7 @@ export default function App() {
 
               {/* Dynamic Bottom Indicators dots overlay */}
               <div 
-                className="absolute bottom-4 left-1/2 -translate-x-1/2 z-25 flex items-center gap-1.5 bg-black/40 backdrop-blur-xs px-3 py-1.5 rounded-full border border-white/5"
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 z-25 flex items-center gap-1.5 bg-black/60 px-3 py-1.5 rounded-full border border-white/5"
                 onClick={(e) => e.stopPropagation()}
               >
                 {slides.map((_, idx) => (
@@ -671,8 +711,8 @@ export default function App() {
               </button>
             </div>
             
-            <div className="grid grid-cols-3 gap-3 sm:gap-6">
-              {products.filter(p => p.category === 'bedsheet').slice(0, 9).map((prod) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {products.filter(p => p.category === 'bedsheet').slice(0, 8).map((prod) => (
                 <ProductCard
                    key={prod.id}
                    product={prod}

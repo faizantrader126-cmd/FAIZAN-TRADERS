@@ -166,7 +166,7 @@ export default function CheckoutModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/60 backdrop-blur-xs"
+        className="absolute inset-0 bg-black/70"
       />
 
       {/* Main container */}

@@ -154,7 +154,7 @@ export default function ProductModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/60 backdrop-blur-xs"
+        className="absolute inset-0 bg-black/70"
       />
 
       {/* Main Modal container */}
@@ -213,7 +213,7 @@ export default function ProductModal({
                         </button>
                         
                         {/* Status tracker tag */}
-                        <span className="absolute bottom-3 right-3 bg-black/75 backdrop-blur-xs text-[8.5px] text-white font-mono font-bold tracking-widest px-2.5 py-1 rounded-md uppercase">
+                        <span className="absolute bottom-3 right-3 bg-black/85 text-[8.5px] text-white font-mono font-bold tracking-widest px-2.5 py-1 rounded-md uppercase">
                           {activeImageIdx + 1}/{allImages.length}
                         </span>
                       </>

@@ -10,7 +10,7 @@ export const CATEGORIES = [
 ];
 
 export const COLLECTIONS = [
-  { id: 'bedsheet', name: 'Bedsheets', image: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=300' },
+  { id: 'bedsheet', name: 'Bedsheets', image: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=300' },
   { id: 'cloth-men-women', name: 'Cloth Men and Women', image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=300' },
   { id: 'electronic-gadgets', name: 'Electronic & Gadgets', image: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&q=80&w=300' },
   { id: 'kitchen-accessories', name: 'Kitchen Accessories', image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=300' },
@@ -33,9 +33,9 @@ export const PRODUCTS: Product[] = [
     originalPrice: 3500,
     description: 'High-thread-count premium pure cotton double bedsheet set with two matching pillow covers.',
     longDescription: 'Treat your master bed to ultimate soft comfort. Made from 100% combed organic long-staple cotton, this luxury bedsheet features a smooth, cooling finish designed to withstand infinite washing cycles without color fading. Includes one double bedsheet and two elegant standard size pillowcases.',
-    image: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600',
+    image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=600',
     images: [
-      'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=600',
       'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=600'
     ],
     rating: 4.9,
@@ -139,7 +139,7 @@ export const PRODUCTS: Product[] = [
     originalPrice: 6500,
     description: 'Breathtaking heavy silk-embroidered bridal king size bedsheet with matching pillowcases & cushion covers.',
     longDescription: 'Our signature bridal collection sheet is stitched with ultimate precision. It features beautiful heavy floral tilla and silk embroidery along the borders and pillow accents. Includes 1 King sheet, 2 Embroidered pillowcases, 2 Textured cushion covers, and 1 pristine bolster cover.',
-    image: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=600',
+    image: 'https://images.unsplash.com/photo-1631679706909-1844bbd07221?auto=format&fit=crop&q=80&w=600',
     rating: 4.9,
     reviewsCount: 46,
     category: 'bedsheet',
@@ -445,7 +445,7 @@ export const BANNER_SLIDES: BannerSlide[] = [
     priceText: 'Direct-to-home quality, unbeatable direct factory prices 🏠',
     badge: 'BEDSHEETS • CLOTHING • COOL GADGETS & HOMEWARES',
     tagline: 'FAST COD DELIVERY • NATIONWIDE PAKISTAN SUPPORT • EASY RETURNS',
-    image: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=1200',
+    image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=1200',
     linkCategory: 'all'
   },
   {

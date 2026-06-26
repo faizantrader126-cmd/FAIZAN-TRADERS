@@ -63,6 +63,11 @@ export default function ProductCard({
   const [activeImage, setActiveImage] = useState<string>(product.image);
   const [isHovered, setIsHovered] = useState(false);
 
+  // Keep activeImage in sync with product.image if the parent updates the product prop (e.g. self-healing)
+  React.useEffect(() => {
+    setActiveImage(product.image);
+  }, [product.image]);
+
   // Fallback / second image swap for premium Minimog hover experience
   const secondaryImage = product.images && product.images.length > 0 ? product.images[0] : null;
 
@@ -130,6 +135,9 @@ export default function ProductCard({
           alt={product.name || 'Product'} 
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          onError={(e) => {
+            e.currentTarget.src = 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=600';
+          }}
         />
         
         {/* Hover Quick View Overlay - Slides up smoothly on hover */}

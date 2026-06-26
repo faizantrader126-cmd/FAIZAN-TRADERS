@@ -141,7 +141,7 @@ export default function Header({
       {/* Mobile menu panel overlay drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-30 flex">
-          <div onClick={() => setMobileMenuOpen(false)} className="absolute inset-0 bg-black/40 backdrop-blur-xs" />
+          <div onClick={() => setMobileMenuOpen(false)} className="absolute inset-0 bg-black/50" />
           <div className="relative w-4/5 max-w-xs bg-white h-full shadow-2xl flex flex-col justify-between p-6">
             <div className="space-y-6 text-left">
               <div className="flex items-center justify-between border-b border-neutral-100 pb-4">

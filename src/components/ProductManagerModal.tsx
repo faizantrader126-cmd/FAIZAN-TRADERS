@@ -643,7 +643,7 @@ export default function ProductManagerModal({
 
   if (!isAuthenticated) {
     return (
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-brand-charcoal/70 backdrop-blur-xs flex justify-center items-center p-4">
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-brand-charcoal/85 flex justify-center items-center p-4">
         <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-brand-black/10 animate-scale-up">
           {/* Header */}
           <div className="bg-brand-black text-white px-5 py-4 flex items-center justify-between border-b border-zinc-900">
@@ -813,7 +813,7 @@ export default function ProductManagerModal({
   const isFormActive = currentView === 'add' || currentView === 'edit';
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-brand-charcoal/70 backdrop-blur-xs flex justify-center items-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-brand-charcoal/85 flex justify-center items-center p-4">
       <div className="bg-white rounded-3xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-brand-black/5 animate-scale-up">
         
         {/* Modal Top Branding Panel Header */}
@@ -2546,7 +2546,7 @@ CREATE TABLE IF NOT EXISTS orders (
                             e.currentTarget.src = 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=600';
                           }}
                         />
-                        <div className="absolute top-1.5 left-1.5 bg-brand-black/80 backdrop-blur-xs text-[7px] text-white font-mono px-2 py-0.5 rounded-md uppercase">Cover Preview</div>
+                        <div className="absolute top-1.5 left-1.5 bg-brand-black/95 text-[7px] text-white font-mono px-2 py-0.5 rounded-md uppercase">Cover Preview</div>
                         <button
                           type="button"
                           onClick={() => setFormImage('')}

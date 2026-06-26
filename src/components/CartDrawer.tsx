@@ -64,7 +64,7 @@ export default function CartDrawer({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/50 backdrop-blur-xs"
+        className="absolute inset-0 bg-black/60"
       />
 
       {/* Cart Drawer Panel */}
