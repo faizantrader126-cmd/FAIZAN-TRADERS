@@ -36,6 +36,30 @@ const getCategoryIcon = (iconName: string) => {
   }
 };
 
+/**
+ * Safe utility to write to LocalStorage with robust error catching
+ * to handle any QuotaExceededError when saving large images.
+ */
+function safeSetLocalStorage(key: string, value: string): boolean {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e: any) {
+    console.error(`LocalStorage write error for key "${key}":`, e);
+    if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e.code === 22) {
+      alert(
+        "⚠️ Browser Storage Space Full!\n\n" +
+        "We couldn't save some settings/images locally because the browser's storage space is full.\n\n" +
+        "To solve this:\n" +
+        "1. Avoid uploading massive image files.\n" +
+        "2. Connect your Supabase Cloud Database to save unlimited items in the cloud!\n" +
+        "3. Clear out some old products in the admin panel to free up storage."
+      );
+    }
+    return false;
+  }
+}
+
 export default function App() {
   // Navigation & Catalogs filter state
   const [activeCategory, setActiveCategory] = useState('all');
@@ -110,19 +134,33 @@ export default function App() {
     });
 
     if (changed || saved === null) {
-      localStorage.setItem('faizan_traders_products', JSON.stringify(sanitizedList));
+      safeSetLocalStorage('faizan_traders_products', JSON.stringify(sanitizedList));
     }
     return sanitizedList;
   });
 
   const saveProductsToStorage = (updatedProducts: Product[]) => {
     setProducts(updatedProducts);
-    localStorage.setItem('faizan_traders_products', JSON.stringify(updatedProducts));
+    safeSetLocalStorage('faizan_traders_products', JSON.stringify(updatedProducts));
     
     // Find which of the default products are missing/deleted
     const remainingIds = new Set(updatedProducts.map(p => p.id));
     const deletedDefaultIds = PRODUCTS.filter(p => !remainingIds.has(p.id)).map(p => p.id);
-    localStorage.setItem('faizan_traders_deleted_products', JSON.stringify(deletedDefaultIds));
+    safeSetLocalStorage('faizan_traders_deleted_products', JSON.stringify(deletedDefaultIds));
+
+    // Post bulk changes to server to keep save cloud node fully synced
+    fetch('/api/products/bulk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedProducts)
+    })
+      .then(res => res.json())
+      .then(json => {
+        if (!json.success) {
+          console.error('Failed to sync products list bulk payload to cloud server database:', json.error);
+        }
+      })
+      .catch(err => console.error('Network error bulk syncing products:', err));
   };
 
   // Dynamic Banners / Slideshow state loaded from LocalStorage or default BANNER_SLIDES
@@ -149,14 +187,28 @@ export default function App() {
     });
 
     if (slideChanged || saved === null) {
-      localStorage.setItem('faizan_traders_slides', JSON.stringify(sanitizedSlides));
+      safeSetLocalStorage('faizan_traders_slides', JSON.stringify(sanitizedSlides));
     }
     return sanitizedSlides;
   });
 
   const saveSlidesToStorage = (updatedSlides: BannerSlide[]) => {
     setSlides(updatedSlides);
-    localStorage.setItem('faizan_traders_slides', JSON.stringify(updatedSlides));
+    safeSetLocalStorage('faizan_traders_slides', JSON.stringify(updatedSlides));
+
+    // Post slides to server
+    fetch('/api/slides', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedSlides)
+    })
+      .then(res => res.json())
+      .then(json => {
+        if (!json.success) {
+          console.error('Failed to sync slides to cloud server:', json.error);
+        }
+      })
+      .catch(err => console.error('Network error syncing slides:', err));
   };
 
   // Home slides banner ticker
@@ -170,22 +222,41 @@ export default function App() {
     }
   }, [slides, currentSlideIdx]);
 
-  // Load products from Supabase asynchronously if custom Supabase URL is active
+  // Load products, slides, and orders from Express backend API
   useEffect(() => {
-    const hasCustomSupabase = localStorage.getItem('custom_supabase_url');
-    if (hasCustomSupabase) {
-      import('./lib/supabase').then(({ fetchProductsFromSupabase }) => {
-        fetchProductsFromSupabase().then((res) => {
-          if (res.success && res.data && res.data.length > 0) {
-            console.log('Synchronized products catalogue live from connected Supabase node.');
-            setProducts(res.data);
-            localStorage.setItem('faizan_traders_products', JSON.stringify(res.data));
-          }
-        });
-      }).catch(err => {
-        console.error('Failed to dynamic import supabase helpers:', err);
+    import('./lib/supabase').then(({ fetchProductsFromSupabase }) => {
+      fetchProductsFromSupabase().then((res) => {
+        if (res.success && res.data && res.data.length > 0) {
+          console.log('Synchronized products catalogue live from cloud server.');
+          setProducts(res.data);
+          safeSetLocalStorage('faizan_traders_products', JSON.stringify(res.data));
+        }
       });
-    }
+    }).catch(err => {
+      console.error('Failed to import database helper:', err);
+    });
+
+    // Fetch slides from Express backend
+    fetch('/api/slides')
+      .then(res => res.json())
+      .then(json => {
+        if (json.success && json.data && json.data.length > 0) {
+          setSlides(json.data);
+          safeSetLocalStorage('faizan_traders_slides', JSON.stringify(json.data));
+        }
+      })
+      .catch(err => console.error('Error fetching slides from server:', err));
+
+    // Fetch orders from Express backend
+    fetch('/api/orders')
+      .then(res => res.json())
+      .then(json => {
+        if (json.success && json.data) {
+          setOrders(json.data);
+          safeSetLocalStorage('faizan_traders_orders', JSON.stringify(json.data));
+        }
+      })
+      .catch(err => console.error('Error fetching orders from server:', err));
   }, []);
 
   // Flash sales deal countdown
@@ -257,12 +328,12 @@ export default function App() {
 
   const saveCartToStorage = (updatedCart: CartItem[]) => {
     setCartItems(updatedCart);
-    localStorage.setItem('faizan_traders_cart', JSON.stringify(updatedCart));
+    safeSetLocalStorage('faizan_traders_cart', JSON.stringify(updatedCart));
   };
 
   const saveOrdersToStorage = (updatedOrders: Order[]) => {
     setOrders(updatedOrders);
-    localStorage.setItem('faizan_traders_orders', JSON.stringify(updatedOrders));
+    safeSetLocalStorage('faizan_traders_orders', JSON.stringify(updatedOrders));
   };
 
   // Automatic slideshow ticking

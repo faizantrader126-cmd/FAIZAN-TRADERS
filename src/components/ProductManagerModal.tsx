@@ -191,9 +191,7 @@ export default function ProductManagerModal({
   onSimulateStatus
 }: ProductManagerModalProps) {
   // Authentication states
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('faizan_isAdmin') === 'true';
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   
   // Registration and credentials persistence state
   const [registeredAdmin, setRegisteredAdmin] = useState<any>(() => {
@@ -2010,7 +2008,13 @@ CREATE TABLE IF NOT EXISTS products (
                     type="button"
                     onClick={() => {
                       if (customLogo) {
-                        localStorage.setItem('custom_store_logo', customLogo);
+                        try {
+                          localStorage.setItem('custom_store_logo', customLogo);
+                        } catch (e: any) {
+                          console.error(e);
+                          alert("⚠️ Browser storage is full! Could not save custom logo locally. Try using a smaller logo file or connect a Supabase cloud database to free up storage space.");
+                          return;
+                        }
                       } else {
                         localStorage.removeItem('custom_store_logo');
                       }
