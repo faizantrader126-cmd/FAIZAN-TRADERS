@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Product, BannerSlide } from '../types';
-import { CATEGORIES } from '../data';
+import { Product, BannerSlide, LayoutConfig } from '../types';
+import { CATEGORIES, BANNER_SLIDES } from '../data';
 import { 
   X, Search, Plus, Edit2, Trash2, RotateCcw, Save, 
   ArrowLeft, Image, Check, AlertTriangle, Layers, Info, Sparkles, Upload,
   TrendingUp, Coins, Database, MailOpen, LayoutDashboard, Eye, Lock, Unlock, Loader2, ExternalLink, Trash, Palette
 } from 'lucide-react';
+import { getApiUrl } from '../lib/apiConfig';
 import { supabase, supabaseUrl, supabaseKey, upsertProductToSupabase, deleteProductFromSupabase, pushAllProductsToSupabase, fetchProductsFromSupabase } from '../lib/supabase';
 import { getSavedTheme, saveAndApplyTheme, THEME_PRESETS, ThemeConfig } from '../lib/theme';
 
@@ -18,6 +19,8 @@ interface ProductManagerModalProps {
   onSaveSlides: (updated: BannerSlide[]) => void;
   sessionOrders: any[];
   onSimulateStatus: (orderId: string) => void;
+  layoutConfig: LayoutConfig;
+  onSaveLayoutConfig: (updated: LayoutConfig) => void;
 }
 
 // Preset curation of premium commercial search images categorized to make adding items super effortless!
@@ -128,11 +131,37 @@ async function uploadImageToCloud(
 ): Promise<string> {
   if (onProgressChange) onProgressChange(true);
   
+  // Method 1: Try local Express server upload (highly reliable, fully local, persistent)
+  try {
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const uploadRes = await fetch(getApiUrl('/api/upload'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: base64, filename: file.name })
+    });
+
+    if (uploadRes.ok) {
+      const uploadData = await uploadRes.json();
+      if (uploadData.success && uploadData.url) {
+        if (onProgressChange) onProgressChange(false);
+        return getApiUrl(uploadData.url);
+      }
+    }
+  } catch (err) {
+    console.warn('Local Express uploader failed, trying telegra.ph...', err);
+  }
+
   try {
     const formData = new FormData();
     formData.append('file', file);
     
-    // Method 1: Try telegra.ph (anonymous, direct file hosting, very fast CDN, completely free without keys)
+    // Method 2: Try telegra.ph (anonymous, direct file hosting, very fast CDN, completely free without keys)
     const res = await fetch('https://telegra.ph/upload', {
       method: 'POST',
       body: formData
@@ -188,10 +217,20 @@ export default function ProductManagerModal({
   slides, 
   onSaveSlides,
   sessionOrders,
-  onSimulateStatus
+  onSimulateStatus,
+  layoutConfig,
+  onSaveLayoutConfig
 }: ProductManagerModalProps) {
   // Authentication states
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+
+  // Dynamic local layout config state
+  const [localLayout, setLocalLayout] = useState<LayoutConfig>(() => layoutConfig);
+
+  // Synchronize localLayout if prop changes
+  useEffect(() => {
+    setLocalLayout(layoutConfig);
+  }, [layoutConfig]);
   
   // Registration and credentials persistence state
   const [registeredAdmin, setRegisteredAdmin] = useState<any>(() => {
@@ -612,7 +651,9 @@ export default function ProductManagerModal({
     const askReset = window.confirm("Are you sure you want to reset all homepage slider banners back to default?");
     if (!askReset) return;
     localStorage.removeItem('faizan_traders_slides');
-    window.location.reload();
+    onSaveSlides(BANNER_SLIDES);
+    setLocalSlides([...BANNER_SLIDES]);
+    alert("Sliders reset back to default successfully! ✨");
   };
 
   // Form Fields variables
@@ -2427,12 +2468,121 @@ CREATE TABLE IF NOT EXISTS products (
                 </div>
               </div>
 
+              {/* SECTION 3: HOMEPAGE SECTIONS VISIBILITY CONTROL */}
+              <div className="space-y-4 pt-6 border-t border-brand-black/5 text-left">
+                <div className="flex items-center gap-2">
+                  <Palette className="h-5 w-5 text-brand-gold" />
+                  <h4 className="text-[11px] font-black text-brand-black uppercase tracking-wider font-mono">3. Manage Website Page Layout & Visibility</h4>
+                </div>
+                <p className="text-[10px] text-zinc-500 font-medium">Toggle visibility of specific sections across the website. Turn off footers, slider banners, or circular collections with a single click in real-time!</p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Toggle Slider */}
+                  <div className="flex items-center justify-between p-3 border border-neutral-200 rounded-xl bg-neutral-50/50">
+                    <div className="text-left">
+                      <span className="text-xs font-bold block text-neutral-800">Hero Slider Banner</span>
+                      <span className="text-[9px] text-zinc-500">Enable/disable top slideshow</span>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={localLayout.showSlider}
+                      onChange={(e) => setLocalLayout(prev => ({ ...prev, showSlider: e.target.checked }))}
+                      className="h-5 w-5 border-neutral-300 rounded text-black focus:ring-black cursor-pointer"
+                    />
+                  </div>
+
+                  {/* Toggle Categories */}
+                  <div className="flex items-center justify-between p-3 border border-neutral-200 rounded-xl bg-neutral-50/50">
+                    <div className="text-left">
+                      <span className="text-xs font-bold block text-neutral-800">Season Categories Carousel</span>
+                      <span className="text-[9px] text-zinc-500">Enable/disable round category circles</span>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={localLayout.showCategories}
+                      onChange={(e) => setLocalLayout(prev => ({ ...prev, showCategories: e.target.checked }))}
+                      className="h-5 w-5 border-neutral-300 rounded text-black focus:ring-black cursor-pointer"
+                    />
+                  </div>
+
+                  {/* Toggle Flash Sale Countdown */}
+                  <div className="flex items-center justify-between p-3 border border-neutral-200 rounded-xl bg-neutral-50/50">
+                    <div className="text-left">
+                      <span className="text-xs font-bold block text-neutral-800">Flash Sale Promo Grid</span>
+                      <span className="text-[9px] text-zinc-500">First section (Bedsheets / Sale Banners)</span>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={localLayout.showFlashSale}
+                      onChange={(e) => setLocalLayout(prev => ({ ...prev, showFlashSale: e.target.checked }))}
+                      className="h-5 w-5 border-neutral-300 rounded text-black focus:ring-black cursor-pointer"
+                    />
+                  </div>
+
+                  {/* Toggle Trending Products */}
+                  <div className="flex items-center justify-between p-3 border border-neutral-200 rounded-xl bg-neutral-50/50">
+                    <div className="text-left">
+                      <span className="text-xs font-bold block text-neutral-800">Trending Clothes & Sofa Covers</span>
+                      <span className="text-[9px] text-zinc-500">Bento grid collections</span>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={localLayout.showTrending}
+                      onChange={(e) => setLocalLayout(prev => ({ ...prev, showTrending: e.target.checked }))}
+                      className="h-5 w-5 border-neutral-300 rounded text-black focus:ring-black cursor-pointer"
+                    />
+                  </div>
+
+                  {/* Toggle Reviews */}
+                  <div className="flex items-center justify-between p-3 border border-neutral-200 rounded-xl bg-neutral-50/50">
+                    <div className="text-left">
+                      <span className="text-xs font-bold block text-neutral-800">Reviews & Testimonials</span>
+                      <span className="text-[9px] text-zinc-500">Customer feedback reviews section</span>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={localLayout.showReviews}
+                      onChange={(e) => setLocalLayout(prev => ({ ...prev, showReviews: e.target.checked }))}
+                      className="h-5 w-5 border-neutral-300 rounded text-black focus:ring-black cursor-pointer"
+                    />
+                  </div>
+
+                  {/* Toggle Inquiry Form */}
+                  <div className="flex items-center justify-between p-3 border border-neutral-200 rounded-xl bg-neutral-50/50">
+                    <div className="text-left">
+                      <span className="text-xs font-bold block text-neutral-800">WhatsApp Direct Query</span>
+                      <span className="text-[9px] text-zinc-500">Send Direct Query form section</span>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={localLayout.showInquiry}
+                      onChange={(e) => setLocalLayout(prev => ({ ...prev, showInquiry: e.target.checked }))}
+                      className="h-5 w-5 border-neutral-300 rounded text-black focus:ring-black cursor-pointer"
+                    />
+                  </div>
+
+                  {/* Toggle Footer */}
+                  <div className="flex items-center justify-between p-3 border border-neutral-200 rounded-xl bg-neutral-50/50">
+                    <div className="text-left">
+                      <span className="text-xs font-bold block text-neutral-800">Brand Footer Section</span>
+                      <span className="text-[9px] text-zinc-500">Remove footer entirely from all pages</span>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={localLayout.showFooter}
+                      onChange={(e) => setLocalLayout(prev => ({ ...prev, showFooter: e.target.checked }))}
+                      className="h-5 w-5 border-neutral-300 rounded text-black focus:ring-black cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* SAVE / RESET ACTIONS */}
               <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-brand-black/5">
                 <button
                   type="button"
                   onClick={() => {
-                    const confirmReset = window.confirm('Are you sure you want to restore the default classic gold & charcoal theme?');
+                    const confirmReset = window.confirm('Are you sure you want to restore the default classic gold & charcoal theme and layout settings?');
                     if (confirmReset) {
                       const defaultTheme = THEME_PRESETS[0];
                       setThemeId(defaultTheme.id);
@@ -2442,12 +2592,24 @@ CREATE TABLE IF NOT EXISTS products (
                       setBrandLightgrayColor(defaultTheme.brandLightgray);
                       setBrandGoldColor(defaultTheme.brandGold);
                       saveAndApplyTheme(defaultTheme);
-                      alert('Restored default classic theme successfully! ✨');
+
+                      const defaultL = {
+                        showSlider: true,
+                        showCategories: true,
+                        showFlashSale: true,
+                        showTrending: true,
+                        showReviews: true,
+                        showInquiry: true,
+                        showFooter: true
+                      };
+                      setLocalLayout(defaultL);
+                      onSaveLayoutConfig(defaultL);
+                      alert('Restored default classic theme and layout settings successfully! ✨');
                     }
                   }}
                   className="px-4 py-2.5 rounded-xl border border-red-200 text-red-750 hover:bg-red-50 hover:text-red-800 text-xs font-bold uppercase cursor-pointer tracking-wider"
                 >
-                  Reset Default Theme 🔄
+                  Reset Defaults 🔄
                 </button>
 
                 <button
@@ -2463,12 +2625,13 @@ CREATE TABLE IF NOT EXISTS products (
                       brandGold: brandGoldColor
                     };
                     saveAndApplyTheme(themeObj);
-                    alert('Theme updated live successfully! ✨ All customers will experience your premium design changes in real-time.');
+                    onSaveLayoutConfig(localLayout);
+                    alert('Theme and Page Layout visibility updated live successfully! ✨ All customers will experience your changes in real-time.');
                   }}
                   className="flex-1 bg-brand-black hover:bg-zinc-800 text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
                 >
                   <Save className="h-4 w-4 text-brand-gold" />
-                  <span>Save & Apply Selected Theme</span>
+                  <span>Save & Apply Selected Theme & Layout</span>
                 </button>
               </div>
             </div>

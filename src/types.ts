@@ -62,3 +62,14 @@ export interface BannerSlide {
   linkCategory: string;
   bgColor?: string;
 }
+
+export interface LayoutConfig {
+  showSlider: boolean;
+  showCategories: boolean;
+  showFlashSale: boolean;
+  showTrending: boolean;
+  showReviews: boolean;
+  showInquiry: boolean;
+  showFooter: boolean;
+}
+

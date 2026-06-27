@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { PRODUCTS, BANNER_SLIDES } from "./src/data";
-import { Product, Order, BannerSlide } from "./src/types";
+import { Product, Order, BannerSlide, LayoutConfig } from "./src/types";
 
 // Database storage file
 const DB_FILE = path.join(process.cwd(), "db.json");
@@ -20,6 +20,7 @@ interface DatabaseSchema {
     created_at: string;
   }[];
   customLogo: string;
+  layout?: LayoutConfig;
 }
 
 // Read database or initialize with seed data
@@ -27,7 +28,21 @@ function readDb(): DatabaseSchema {
   try {
     if (fs.existsSync(DB_FILE)) {
       const content = fs.readFileSync(DB_FILE, "utf-8");
-      return JSON.parse(content);
+      const db = JSON.parse(content);
+      // Ensure layout exists
+      if (!db.layout) {
+        db.layout = {
+          showSlider: true,
+          showCategories: true,
+          showFlashSale: true,
+          showTrending: true,
+          showReviews: true,
+          showInquiry: true,
+          showFooter: true
+        };
+        writeDb(db);
+      }
+      return db;
     }
   } catch (err) {
     console.error("Error reading db.json, recreating...", err);
@@ -39,7 +54,16 @@ function readDb(): DatabaseSchema {
     slides: BANNER_SLIDES,
     orders: [],
     inquiries: [],
-    customLogo: ""
+    customLogo: "",
+    layout: {
+      showSlider: true,
+      showCategories: true,
+      showFlashSale: true,
+      showTrending: true,
+      showReviews: true,
+      showInquiry: true,
+      showFooter: true
+    }
   };
   writeDb(defaultDb);
   return defaultDb;
@@ -71,6 +95,15 @@ async function startServer() {
   // Middleware with large limits for base64 / image uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+  // Create uploads directory if it doesn't exist
+  const UPLOADS_DIR = path.join(process.cwd(), "uploads");
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
+
+  // Serve uploads directory statically
+  app.use("/uploads", express.static(UPLOADS_DIR));
 
   // API Routes: Products
   app.get("/api/products", (req, res) => {
@@ -242,6 +275,56 @@ async function startServer() {
       db.customLogo = req.body.logo || "";
       writeDb(db);
       res.json({ success: true, logo: db.customLogo });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // API Routes: Layout Config setting toggle switches
+  app.get("/api/layout", (req, res) => {
+    const db = readDb();
+    res.json({ success: true, data: db.layout });
+  });
+
+  app.post("/api/layout", (req, res) => {
+    try {
+      const db = readDb();
+      db.layout = { ...db.layout, ...req.body } as LayoutConfig;
+      writeDb(db);
+      res.json({ success: true, data: db.layout });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // API Routes: Image uploader (handles base64 image strings and writes locally)
+  app.post("/api/upload", (req, res) => {
+    try {
+      const { image, filename } = req.body as { image: string; filename?: string };
+      if (!image) {
+        return res.status(400).json({ success: false, error: "No image content provided" });
+      }
+
+      // If it's a data URL, strip header and save binary data
+      const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      if (!matches || matches.length !== 3) {
+        // Assume already uploaded URL or format we can't parse directly
+        return res.json({ success: true, url: image });
+      }
+
+      const mimeType = matches[1];
+      const base64Data = matches[2];
+      const buffer = Buffer.from(base64Data, "base64");
+
+      const extension = mimeType.split("/")[1] || "png";
+      const fileId = "img_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+      const name = filename ? `${fileId}_${filename.replace(/[^a-zA-Z0-9.-]/g, "_")}` : `${fileId}.${extension}`;
+      const filePath = path.join(UPLOADS_DIR, name);
+
+      fs.writeFileSync(filePath, buffer);
+
+      const publicUrl = `/uploads/${name}`;
+      res.json({ success: true, url: publicUrl });
     } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });
     }

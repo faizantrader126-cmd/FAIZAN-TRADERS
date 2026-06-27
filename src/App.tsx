@@ -10,7 +10,7 @@ import ProductManagerModal from './components/ProductManagerModal';
 
 // Data models
 import { PRODUCTS, CATEGORIES, BANNER_SLIDES, REVIEWS, COLLECTIONS } from './data';
-import { Product, CartItem, Order, BannerSlide } from './types';
+import { Product, CartItem, Order, BannerSlide, LayoutConfig } from './types';
 import { saveInquiryToSupabase } from './lib/supabase';
 import { getApiUrl } from './lib/apiConfig';
 
@@ -77,6 +77,27 @@ export default function App() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isTrackerOpen, setIsTrackerOpen] = useState(false);
   const [isManagerOpen, setIsManagerOpen] = useState(false);
+
+  // Dynamic Store Layout section configurations
+  const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(() => {
+    const saved = localStorage.getItem('store_layout_config');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return {
+      showSlider: true,
+      showCategories: true,
+      showFlashSale: true,
+      showTrending: true,
+      showReviews: true,
+      showInquiry: true,
+      showFooter: true
+    };
+  });
 
   // Dynamic Products Inventory state loaded from LocalStorage or PRODUCTS defaults
   const [products, setProducts] = useState<Product[]>(() => {
@@ -212,6 +233,25 @@ export default function App() {
       .catch(err => console.error('Network error syncing slides:', err));
   };
 
+  const saveLayoutConfigToStorage = (updatedLayout: LayoutConfig) => {
+    setLayoutConfig(updatedLayout);
+    safeSetLocalStorage('store_layout_config', JSON.stringify(updatedLayout));
+
+    // Post to Express backend
+    fetch(getApiUrl('/api/layout'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedLayout)
+    })
+      .then(res => res.json())
+      .then(json => {
+        if (!json.success) {
+          console.error('Failed to sync layout config to cloud server:', json.error);
+        }
+      })
+      .catch(err => console.error('Network error syncing layout config:', err));
+  };
+
   // Home slides banner ticker
   const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
 
@@ -258,6 +298,17 @@ export default function App() {
         }
       })
       .catch(err => console.error('Error fetching orders from server:', err));
+
+    // Fetch layout config from Express backend
+    fetch(getApiUrl('/api/layout'))
+      .then(res => res.json())
+      .then(json => {
+        if (json.success && json.data) {
+          setLayoutConfig(json.data);
+          safeSetLocalStorage('store_layout_config', JSON.stringify(json.data));
+        }
+      })
+      .catch(err => console.error('Error fetching layout config from server:', err));
   }, []);
 
   // Flash sales deal countdown
@@ -510,193 +561,197 @@ export default function App() {
         }}
       />
       {/* 2. Hero Slideshow banner (Full Width Edge-to-Edge) */}
-      <section className="relative overflow-hidden bg-brand-charcoal w-full text-white">
-        <div className="absolute inset-0 bg-gradient-to-r from-zinc-800/20 via-transparent to-transparent opacity-85 pointer-events-none" />
+      {layoutConfig.showSlider && (
+        <section className="relative overflow-hidden bg-brand-charcoal w-full text-white">
+          <div className="absolute inset-0 bg-gradient-to-r from-zinc-800/20 via-transparent to-transparent opacity-85 pointer-events-none" />
 
-        {slides.length > 0 && slides[currentSlideIdx] ? (
-          <div className="w-full relative z-10">
-            {/* Full Width Image Slide element */}
-            <div 
-              onClick={() => {
-                if (slides[currentSlideIdx].linkCategory) {
-                  setActiveCategory(slides[currentSlideIdx].linkCategory);
-                  document.getElementById('product-catalog-grid')?.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-              className="relative group aspect-[2.1/1] sm:aspect-[2.8/1] md:aspect-[3.1/1] xl:aspect-[3.4/1] w-full overflow-hidden bg-zinc-900 cursor-pointer"
-            >
-              <img 
-                src={slides[currentSlideIdx].image} 
-                alt={slides[currentSlideIdx].title || "Banner Slide"} 
-                className="h-full w-full object-cover transform scale-100 hover:scale-[1.015] transition-transform duration-700"
-              />
-              
-              {/* Premium dark shading on left part to assist typography visibility if any */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent pointer-events-none" />
+          {slides.length > 0 && slides[currentSlideIdx] ? (
+            <div className="w-full relative z-10">
+              {/* Full Width Image Slide element */}
+              <div 
+                onClick={() => {
+                  if (slides[currentSlideIdx].linkCategory) {
+                    setActiveCategory(slides[currentSlideIdx].linkCategory);
+                    document.getElementById('product-catalog-grid')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="relative group aspect-[2.1/1] sm:aspect-[2.8/1] md:aspect-[3.1/1] xl:aspect-[3.4/1] w-full overflow-hidden bg-zinc-900 cursor-pointer"
+              >
+                <img 
+                  src={slides[currentSlideIdx].image} 
+                  alt={slides[currentSlideIdx].title || "Banner Slide"} 
+                  className="h-full w-full object-cover transform scale-100 hover:scale-[1.015] transition-transform duration-700"
+                />
+                
+                {/* Premium dark shading on left part to assist typography visibility if any */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent pointer-events-none" />
 
-              {/* Dynamic Overlay Text & CTA Button if slide is configured with information */}
-              {(slides[currentSlideIdx].title || slides[currentSlideIdx].subtitle) && (
-                <div className="absolute inset-0 flex items-center justify-start p-6 sm:p-12 md:p-16 text-left select-none">
-                  <div className="max-w-xs sm:max-w-lg md:max-w-xl space-y-1.5 sm:space-y-3.5 z-20 animate-fade-in">
-                    {slides[currentSlideIdx].badge && (
-                      <span className="inline-block bg-white text-black text-[9px] sm:text-[11px] font-black px-2.5 sm:px-3.5 py-0.5 sm:py-1 rounded-full uppercase tracking-wider shadow-md border border-black/10">
-                        {slides[currentSlideIdx].badge}
-                      </span>
-                    )}
-                    <h1 className="font-display text-base sm:text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight drop-shadow-md">
-                      {slides[currentSlideIdx].title}
-                    </h1>
-                    <p className="text-zinc-200 text-xs sm:text-base md:text-lg font-bold drop-shadow-sm font-sans">
-                      {slides[currentSlideIdx].subtitle}
-                    </p>
-                    {slides[currentSlideIdx].priceText && (
-                      <div className="text-white text-xs sm:text-sm md:text-lg font-black font-mono tracking-wide border-l-2 border-white pl-2">
-                        {slides[currentSlideIdx].priceText}
+                {/* Dynamic Overlay Text & CTA Button if slide is configured with information */}
+                {(slides[currentSlideIdx].title || slides[currentSlideIdx].subtitle) && (
+                  <div className="absolute inset-0 flex items-center justify-start p-6 sm:p-12 md:p-16 text-left select-none">
+                    <div className="max-w-xs sm:max-w-lg md:max-w-xl space-y-1.5 sm:space-y-3.5 z-20 animate-fade-in">
+                      {slides[currentSlideIdx].badge && (
+                        <span className="inline-block bg-white text-black text-[9px] sm:text-[11px] font-black px-2.5 sm:px-3.5 py-0.5 sm:py-1 rounded-full uppercase tracking-wider shadow-md border border-black/10">
+                          {slides[currentSlideIdx].badge}
+                        </span>
+                      )}
+                      <h1 className="font-display text-base sm:text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight drop-shadow-md">
+                        {slides[currentSlideIdx].title}
+                      </h1>
+                      <p className="text-zinc-200 text-xs sm:text-base md:text-lg font-bold drop-shadow-sm font-sans">
+                        {slides[currentSlideIdx].subtitle}
+                      </p>
+                      {slides[currentSlideIdx].priceText && (
+                        <div className="text-white text-xs sm:text-sm md:text-lg font-black font-mono tracking-wide border-l-2 border-white pl-2">
+                          {slides[currentSlideIdx].priceText}
+                        </div>
+                      )}
+                      
+                      <div className="pt-1 sm:pt-3">
+                        <span className="inline-flex items-center gap-1.5 bg-white text-black hover:bg-zinc-100 font-black text-[8px] sm:text-[10px] md:text-xs px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl uppercase tracking-wider transition-all duration-300 shadow-lg">
+                          <span>Shop Now</span>
+                          <ShoppingBag className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                        </span>
                       </div>
-                    )}
-                    
-                    <div className="pt-1 sm:pt-3">
-                      <span className="inline-flex items-center gap-1.5 bg-white text-black hover:bg-zinc-100 font-black text-[8px] sm:text-[10px] md:text-xs px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl uppercase tracking-wider transition-all duration-300 shadow-lg">
-                        <span>Shop Now</span>
-                        <ShoppingBag className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                      </span>
                     </div>
                   </div>
+                )}
+
+                {/* Slider Absolute Edge Actions - Left Chevron */}
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentSlideIdx((prev) => (prev - 1 + slides.length) % slides.length);
+                  }}
+                  className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-25 h-8 w-8 sm:h-12 sm:w-12 rounded-full bg-white/90 hover:bg-white text-brand-black flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 md:opacity-0 group-hover:opacity-100 cursor-pointer"
+                  title="Previous Banner"
+                >
+                  <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
+                </button>
+
+                {/* Slider Absolute Edge Actions - Right Chevron */}
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentSlideIdx((prev) => (prev + 1) % slides.length);
+                  }}
+                  className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-25 h-8 w-8 sm:h-12 sm:w-12 rounded-full bg-white/90 hover:bg-white text-brand-black flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 md:opacity-0 group-hover:opacity-100 cursor-pointer"
+                  title="Next Banner"
+                >
+                  <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
+                </button>
+
+                {/* Dynamic Bottom Indicators dots overlay */}
+                <div 
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 z-25 flex items-center gap-1.5 bg-black/60 px-3 py-1.5 rounded-full border border-white/5"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {slides.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentSlideIdx(idx)}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        currentSlideIdx === idx ? 'w-5 bg-white' : 'w-1.5 bg-white/45 hover:bg-white'
+                      }`}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    />
+                  ))}
                 </div>
-              )}
-
-              {/* Slider Absolute Edge Actions - Left Chevron */}
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCurrentSlideIdx((prev) => (prev - 1 + slides.length) % slides.length);
-                }}
-                className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-25 h-8 w-8 sm:h-12 sm:w-12 rounded-full bg-white/90 hover:bg-white text-brand-black flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 md:opacity-0 group-hover:opacity-100 cursor-pointer"
-                title="Previous Banner"
-              >
-                <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
-              </button>
-
-              {/* Slider Absolute Edge Actions - Right Chevron */}
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCurrentSlideIdx((prev) => (prev + 1) % slides.length);
-                }}
-                className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-25 h-8 w-8 sm:h-12 sm:w-12 rounded-full bg-white/90 hover:bg-white text-brand-black flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 md:opacity-0 group-hover:opacity-100 cursor-pointer"
-                title="Next Banner"
-              >
-                <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
-              </button>
-
-              {/* Dynamic Bottom Indicators dots overlay */}
-              <div 
-                className="absolute bottom-4 left-1/2 -translate-x-1/2 z-25 flex items-center gap-1.5 bg-black/60 px-3 py-1.5 rounded-full border border-white/5"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {slides.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentSlideIdx(idx)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      currentSlideIdx === idx ? 'w-5 bg-white' : 'w-1.5 bg-white/45 hover:bg-white'
-                    }`}
-                    aria-label={`Go to slide ${idx + 1}`}
-                  />
-                ))}
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="text-center py-24 bg-zinc-950">
-            <p className="text-zinc-400 font-mono text-xs">No Slider Banners Active. Configure some inside the Admin portal.</p>
-          </div>
-        )}
-      </section>
+          ) : (
+            <div className="text-center py-24 bg-zinc-950">
+              <p className="text-zinc-400 font-mono text-xs">No Slider Banners Active. Configure some inside the Admin portal.</p>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* 3. Season Collection - Circular Auto-Sliding Carousel */}
-      <section className="py-12 bg-white border-b border-neutral-100 select-none overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative group/carousel">
-          <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white bg-black px-2.5 py-1 rounded-md inline-block mb-2">
-            Trending Categories
-          </span>
-          <h2 className="font-display text-2xl sm:text-3xl font-black text-brand-black tracking-tight uppercase">
-            Season Collection
-          </h2>
-          <p className="text-[11px] text-zinc-400 font-medium mt-1">Discover what's hot & trending this week</p>
-          
-          <div className="relative mt-8 px-8 flex items-center justify-center">
-            {/* Left manual slide action */}
-            <button
-              onClick={handlePrevColSlide}
-              className="absolute left-0 z-20 h-10 w-10 rounded-full bg-black text-white hover:bg-neutral-800 flex items-center justify-center shadow-md transition-all hover:scale-105 border border-white/10 cursor-pointer"
-              title="Slide Left"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
+      {layoutConfig.showCategories && (
+        <section className="py-12 bg-white border-b border-neutral-100 select-none overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative group/carousel">
+            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white bg-black px-2.5 py-1 rounded-md inline-block mb-2">
+              Trending Categories
+            </span>
+            <h2 className="font-display text-2xl sm:text-3xl font-black text-brand-black tracking-tight uppercase">
+              Season Collection
+            </h2>
+            <p className="text-[11px] text-zinc-400 font-medium mt-1">Discover what's hot & trending this week</p>
+            
+            <div className="relative mt-8 px-8 flex items-center justify-center">
+              {/* Left manual slide action */}
+              <button
+                onClick={handlePrevColSlide}
+                className="absolute left-0 z-20 h-10 w-10 rounded-full bg-black text-white hover:bg-neutral-800 flex items-center justify-center shadow-md transition-all hover:scale-105 border border-white/10 cursor-pointer"
+                title="Slide Left"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
 
-            {/* Rotating Slider Container */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 w-full max-w-5xl mx-auto py-2 justify-items-center">
-              <AnimatePresence mode="popLayout" initial={false}>
-                {collectionsList.map((col, idx) => {
-                  // Display only 4 on desktop, 3 on tablet, 2 on mobile to avoid overflow and maintain perfect alignment with no cutoffs
-                  const isVisible = idx < 4;
-                  if (!isVisible) return null;
+              {/* Rotating Slider Container */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 w-full max-w-5xl mx-auto py-2 justify-items-center">
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {collectionsList.map((col, idx) => {
+                    // Display only 4 on desktop, 3 on tablet, 2 on mobile to avoid overflow and maintain perfect alignment with no cutoffs
+                    const isVisible = idx < 4;
+                    if (!isVisible) return null;
 
-                  return (
-                    <motion.button
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                      key={col.id}
-                      onClick={() => handleCollectionClick(col.id)}
-                      className={`flex flex-col items-center group cursor-pointer text-center relative w-full ${
-                        idx === 2 ? 'hidden sm:flex' : idx === 3 ? 'hidden md:flex' : 'flex'
-                      }`}
-                    >
-                      <div className="aspect-square w-full max-w-[120px] xs:max-w-[140px] sm:max-w-[160px] md:max-w-[180px] lg:max-w-[210px] rounded-full overflow-hidden border-2 border-brand-black/5 group-hover:border-black transition-all duration-300 scale-100 group-hover:scale-105 shadow-md bg-zinc-50 relative flex items-center justify-center mx-auto">
-                        {col.image ? (
-                          <img 
-                            src={col.image} 
-                            alt={col.name} 
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                            onError={(e) => {
-                              // Custom robust fallback if image cannot load
-                              e.currentTarget.src = 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=300';
-                            }}
-                          />
-                        ) : (
-                          // Blank image / Placeholder pattern
-                          <div className="absolute inset-0 bg-zinc-100 flex items-center justify-center text-zinc-300">
-                            <ShoppingBag className="h-8 w-8" />
-                          </div>
-                        )}
-                        {/* Dynamic glow overlay */}
-                        <div className="absolute inset-0 bg-brand-black/5 group-hover:bg-transparent transition-colors pointer-events-none" />
-                      </div>
-                      
-                      <span className="text-[12px] sm:text-sm font-extrabold text-neutral-800 mt-4 group-hover:text-black transition-colors font-sans tracking-wide block max-w-[110px] sm:max-w-[150px] line-clamp-1">
-                        {col.name}
-                      </span>
-                    </motion.button>
-                  );
-                })}
-              </AnimatePresence>
+                    return (
+                      <motion.button
+                        layout
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                        key={col.id}
+                        onClick={() => handleCollectionClick(col.id)}
+                        className={`flex flex-col items-center group cursor-pointer text-center relative w-full ${
+                          idx === 2 ? 'hidden sm:flex' : idx === 3 ? 'hidden md:flex' : 'flex'
+                        }`}
+                      >
+                        <div className="aspect-square w-full max-w-[120px] xs:max-w-[140px] sm:max-w-[160px] md:max-w-[180px] lg:max-w-[210px] rounded-full overflow-hidden border-2 border-brand-black/5 group-hover:border-black transition-all duration-300 scale-100 group-hover:scale-105 shadow-md bg-zinc-50 relative flex items-center justify-center mx-auto">
+                          {col.image ? (
+                            <img 
+                              src={col.image} 
+                              alt={col.name} 
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                              onError={(e) => {
+                                // Custom robust fallback if image cannot load
+                                e.currentTarget.src = 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=300';
+                              }}
+                            />
+                          ) : (
+                            // Blank image / Placeholder pattern
+                            <div className="absolute inset-0 bg-zinc-100 flex items-center justify-center text-zinc-300">
+                              <ShoppingBag className="h-8 w-8" />
+                            </div>
+                          )}
+                          {/* Dynamic glow overlay */}
+                          <div className="absolute inset-0 bg-brand-black/5 group-hover:bg-transparent transition-colors pointer-events-none" />
+                        </div>
+                        
+                        <span className="text-[12px] sm:text-sm font-extrabold text-neutral-800 mt-4 group-hover:text-black transition-colors font-sans tracking-wide block max-w-[110px] sm:max-w-[150px] line-clamp-1">
+                          {col.name}
+                        </span>
+                      </motion.button>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+
+              {/* Right manual slide action */}
+              <button
+                onClick={handleNextColSlide}
+                className="absolute right-0 z-20 h-10 w-10 rounded-full bg-black text-white hover:bg-neutral-800 flex items-center justify-center shadow-md transition-all hover:scale-105 border border-white/10 cursor-pointer"
+                title="Slide Right"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
             </div>
-
-            {/* Right manual slide action */}
-            <button
-              onClick={handleNextColSlide}
-              className="absolute right-0 z-20 h-10 w-10 rounded-full bg-black text-white hover:bg-neutral-800 flex items-center justify-center shadow-md transition-all hover:scale-105 border border-white/10 cursor-pointer"
-              title="Slide Right"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 4. Main Contents Block (Bento Lookbook Home vs Filtered Search Grid) */}
       {activeCategory !== 'all' || searchQuery !== '' ? (
@@ -805,243 +860,250 @@ export default function App() {
         <div id="product-catalog-grid" className="space-y-16 py-12 bg-neutral-50/30">
           
           {/* Section A: Bedsheets Grid */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
-              <div>
-                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">SWEET DEALS • 30% OFF</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Premium Bedsheets</h2>
-              </div>
-              <button 
-                onClick={() => setActiveCategory('bedsheet')}
-                className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
-              >
-                View all bedsheets &rarr;
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {products.filter(p => p.category === 'bedsheet').slice(0, 8).map((prod) => (
-                <ProductCard
-                   key={prod.id}
-                   product={prod}
-                   onViewDetails={setSelectedProduct}
-                   onAddToCart={(p) => handleAddToCart(p, 1)}
-                   isItemInCart={cartItems.some(item => item.product.id === prod.id)}
-                />
-              ))}
-            </div>
-          </section>
-
-          {/* Section B: Cloth Men and Women Grid */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
-              <div>
-                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">MOST POPULAR • LOVED BY ALL</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Cloth Men and Women</h2>
-              </div>
-              <button 
-                onClick={() => setActiveCategory('cloth-men-women')}
-                className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
-              >
-                View all clothes &rarr;
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {products.filter(p => p.category === 'cloth-men-women').slice(0, 4).map((prod) => (
-                <ProductCard
-                   key={prod.id}
-                   product={prod}
-                   onViewDetails={setSelectedProduct}
-                   onAddToCart={(p) => handleAddToCart(p, 1)}
-                   isItemInCart={cartItems.some(item => item.product.id === prod.id)}
-                />
-              ))}
-            </div>
-          </section>
-
-          {/* Section C: Electronic & Gadgets - Bento Spotlight Layout */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
-              <div>
-                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">COOL DEVICES & SMART LIFESTYLE</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Electronic & Gadgets</h2>
-              </div>
-              <button 
-                onClick={() => setActiveCategory('electronic-gadgets')}
-                className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
-              >
-                View all gadgets &rarr;
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              {/* Premium Lookbook Promotional Banner Card (1/3 wide) */}
-              <div className="lg:col-span-4 relative rounded-2xl overflow-hidden aspect-4/5 lg:aspect-auto bg-neutral-900 text-white min-h-[350px] lg:min-h-full flex flex-col justify-end p-6 sm:p-8 shadow-md group">
-                <img 
-                  src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&q=80&w=600" 
-                  alt="Electronic and Gadgets Lookbook" 
-                  className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
-                
-                <div className="relative z-10 text-left space-y-3">
-                  <span className="bg-white text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-white/10">
-                    FLAT 30% OFF
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
-                    Smart Daily Devices
-                  </h3>
-                  <p className="text-zinc-200 text-xs">
-                    Curated with the latest high-performance audio systems, portable fitness bands and ambient lamps.
-                  </p>
-                  <div className="pt-2">
-                    <button 
-                      onClick={() => setActiveCategory('electronic-gadgets')}
-                      className="bg-white text-black hover:bg-zinc-100 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
-                    >
-                      Shop Collection
-                    </button>
-                  </div>
+          {layoutConfig.showFlashSale && (
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
+                <div>
+                  <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">SWEET DEALS • 30% OFF</span>
+                  <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Premium Bedsheets</h2>
                 </div>
+                <button 
+                  onClick={() => setActiveCategory('bedsheet')}
+                  className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
+                >
+                  View all bedsheets &rarr;
+                </button>
               </div>
-
-              {/* 3-Column Product List Next to it (2/3 wide) */}
-              <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {products.filter(p => p.category === 'electronic-gadgets').slice(0, 3).map((prod) => (
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {products.filter(p => p.category === 'bedsheet').slice(0, 8).map((prod) => (
                   <ProductCard
-                    key={prod.id}
-                    product={prod}
-                    onViewDetails={setSelectedProduct}
-                    onAddToCart={(p) => handleAddToCart(p, 1)}
-                    isItemInCart={cartItems.some(item => item.product.id === prod.id)}
+                     key={prod.id}
+                     product={prod}
+                     onViewDetails={setSelectedProduct}
+                     onAddToCart={(p) => handleAddToCart(p, 1)}
+                     isItemInCart={cartItems.some(item => item.product.id === prod.id)}
                   />
                 ))}
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
-          {/* Section D: Kitchen Accessories - Bento Spotlight Layout */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
-              <div>
-                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">PRACTICAL & MODERN HOME COOKING</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Kitchen Accessories</h2>
-              </div>
-              <button 
-                onClick={() => setActiveCategory('kitchen-accessories')}
-                className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
-              >
-                View all accessories &rarr;
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              {/* 3-Column Product List (2/3 wide) */}
-              <div className="lg:col-span-8 order-2 lg:order-1 grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {products.filter(p => p.category === 'kitchen-accessories').slice(0, 3).map((prod) => (
-                  <ProductCard
-                    key={prod.id}
-                    product={prod}
-                    onViewDetails={setSelectedProduct}
-                    onAddToCart={(p) => handleAddToCart(p, 1)}
-                    isItemInCart={cartItems.some(item => item.product.id === prod.id)}
-                  />
-                ))}
-              </div>
-
-              {/* Premium Lookbook Promotional Banner Card (1/3 wide) on the right */}
-              <div className="lg:col-span-4 order-1 lg:order-2 relative rounded-2xl overflow-hidden aspect-4/5 lg:aspect-auto bg-neutral-900 text-white min-h-[350px] lg:min-h-full flex flex-col justify-end p-6 sm:p-8 shadow-md group">
-                <img 
-                  src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=600" 
-                  alt="Kitchen Accessories Lookbook" 
-                  className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
+          {/* Section B, C, D, E: Bento collections */}
+          {layoutConfig.showTrending && (
+            <>
+              {/* Section B: Cloth Men and Women Grid */}
+              <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
+                  <div>
+                    <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">MOST POPULAR • LOVED BY ALL</span>
+                    <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Cloth Men and Women</h2>
+                  </div>
+                  <button 
+                    onClick={() => setActiveCategory('cloth-men-women')}
+                    className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
+                  >
+                    View all clothes &rarr;
+                  </button>
+                </div>
                 
-                <div className="relative z-10 text-left space-y-3">
-                  <span className="bg-white text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-white/10">
-                    MODERN KITCHEN
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
-                    Premium Cooking Tools
-                  </h3>
-                  <p className="text-zinc-200 text-xs">
-                    Crafted with premium grade food-safe silicone, warm organic beechwood handles & durable steel.
-                  </p>
-                  <div className="pt-2">
-                    <button 
-                      onClick={() => setActiveCategory('kitchen-accessories')}
-                      className="bg-white text-black hover:bg-zinc-100 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
-                    >
-                      Shop Kitchen Wear
-                    </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {products.filter(p => p.category === 'cloth-men-women').slice(0, 4).map((prod) => (
+                    <ProductCard
+                       key={prod.id}
+                       product={prod}
+                       onViewDetails={setSelectedProduct}
+                       onAddToCart={(p) => handleAddToCart(p, 1)}
+                       isItemInCart={cartItems.some(item => item.product.id === prod.id)}
+                    />
+                  ))}
+                </div>
+              </section>
+
+              {/* Section C: Electronic & Gadgets - Bento Spotlight Layout */}
+              <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
+                  <div>
+                    <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">COOL DEVICES & SMART LIFESTYLE</span>
+                    <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Electronic & Gadgets</h2>
+                  </div>
+                  <button 
+                    onClick={() => setActiveCategory('electronic-gadgets')}
+                    className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
+                  >
+                    View all gadgets &rarr;
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  {/* Premium Lookbook Promotional Banner Card (1/3 wide) */}
+                  <div className="lg:col-span-4 relative rounded-2xl overflow-hidden aspect-4/5 lg:aspect-auto bg-neutral-900 text-white min-h-[350px] lg:min-h-full flex flex-col justify-end p-6 sm:p-8 shadow-md group">
+                    <img 
+                      src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&q=80&w=600" 
+                      alt="Electronic and Gadgets Lookbook" 
+                      className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
+                    
+                    <div className="relative z-10 text-left space-y-3">
+                      <span className="bg-white text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-white/10">
+                        FLAT 30% OFF
+                      </span>
+                      <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
+                        Smart Daily Devices
+                      </h3>
+                      <p className="text-zinc-200 text-xs">
+                        Curated with the latest high-performance audio systems, portable fitness bands and ambient lamps.
+                      </p>
+                      <div className="pt-2">
+                        <button 
+                          onClick={() => setActiveCategory('electronic-gadgets')}
+                          className="bg-white text-black hover:bg-zinc-100 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                        >
+                          Shop Collection
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3-Column Product List Next to it (2/3 wide) */}
+                  <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    {products.filter(p => p.category === 'electronic-gadgets').slice(0, 3).map((prod) => (
+                      <ProductCard
+                        key={prod.id}
+                        product={prod}
+                        onViewDetails={setSelectedProduct}
+                        onAddToCart={(p) => handleAddToCart(p, 1)}
+                        isItemInCart={cartItems.some(item => item.product.id === prod.id)}
+                      />
+                    ))}
                   </div>
                 </div>
-              </div>
-            </div>
-          </section>
+              </section>
 
-          {/* Section E: Water Bottles - Bento Spotlight Layout */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
-              <div>
-                <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">BPA-FREE TRITAN & INSULATED STEEL FLASKS</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Water Bottles</h2>
-              </div>
-              <button 
-                onClick={() => setActiveCategory('water-bottles')}
-                className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
-              >
-                View all bottles &rarr;
-              </button>
-            </div>
+              {/* Section D: Kitchen Accessories - Bento Spotlight Layout */}
+              <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
+                  <div>
+                    <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">PRACTICAL & MODERN HOME COOKING</span>
+                    <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Kitchen Accessories</h2>
+                  </div>
+                  <button 
+                    onClick={() => setActiveCategory('kitchen-accessories')}
+                    className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
+                  >
+                    View all accessories &rarr;
+                  </button>
+                </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              {/* Premium Lookbook Promotional Banner Card (1/3 wide) */}
-              <div className="lg:col-span-4 relative rounded-2xl overflow-hidden aspect-4/5 lg:aspect-auto bg-neutral-900 text-white min-h-[350px] lg:min-h-full flex flex-col justify-end p-6 sm:p-8 shadow-md group">
-                <img 
-                  src="https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&q=80&w=600" 
-                  alt="Water Bottles Lookbook" 
-                  className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
-                
-                <div className="relative z-10 text-left space-y-3">
-                  <span className="bg-white text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-white/10">
-                    BPA FREE HYDRATION
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
-                    Insulated Thermal Flasks
-                  </h3>
-                  <p className="text-zinc-200 text-xs">
-                    Keep liquids cold up to 24 hours or steaming hot for 12 hours with smart leakproof travel options.
-                  </p>
-                  <div className="pt-2">
-                    <button 
-                      onClick={() => setActiveCategory('water-bottles')}
-                      className="bg-white text-black hover:bg-zinc-100 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
-                    >
-                      Shop Bottles
-                    </button>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  {/* 3-Column Product List (2/3 wide) */}
+                  <div className="lg:col-span-8 order-2 lg:order-1 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    {products.filter(p => p.category === 'kitchen-accessories').slice(0, 3).map((prod) => (
+                      <ProductCard
+                        key={prod.id}
+                        product={prod}
+                        onViewDetails={setSelectedProduct}
+                        onAddToCart={(p) => handleAddToCart(p, 1)}
+                        isItemInCart={cartItems.some(item => item.product.id === prod.id)}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Premium Lookbook Promotional Banner Card (1/3 wide) on the right */}
+                  <div className="lg:col-span-4 order-1 lg:order-2 relative rounded-2xl overflow-hidden aspect-4/5 lg:aspect-auto bg-neutral-900 text-white min-h-[350px] lg:min-h-full flex flex-col justify-end p-6 sm:p-8 shadow-md group">
+                    <img 
+                      src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=600" 
+                      alt="Kitchen Accessories Lookbook" 
+                      className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
+                    
+                    <div className="relative z-10 text-left space-y-3">
+                      <span className="bg-white text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-white/10">
+                        MODERN KITCHEN
+                      </span>
+                      <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
+                        Premium Cooking Tools
+                      </h3>
+                      <p className="text-zinc-200 text-xs">
+                        Crafted with premium grade food-safe silicone, warm organic beechwood handles & durable steel.
+                      </p>
+                      <div className="pt-2">
+                        <button 
+                          onClick={() => setActiveCategory('kitchen-accessories')}
+                          className="bg-white text-black hover:bg-zinc-100 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                        >
+                          Shop Kitchen Wear
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </section>
 
-              {/* 3-Column Product List (2/3 wide) */}
-              <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {products.filter(p => p.category === 'water-bottles').slice(0, 3).map((prod) => (
-                  <ProductCard
-                    key={prod.id}
-                    product={prod}
-                    onViewDetails={setSelectedProduct}
-                    onAddToCart={(p) => handleAddToCart(p, 1)}
-                    isItemInCart={cartItems.some(item => item.product.id === prod.id)}
-                  />
-                ))}
-              </div>
-            </div>
-          </section>
+              {/* Section E: Water Bottles - Bento Spotlight Layout */}
+              <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 text-left border-b border-neutral-100 pb-4">
+                  <div>
+                    <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase font-mono">BPA-FREE TRITAN & INSULATED STEEL FLASKS</span>
+                    <h2 className="font-display text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mt-1">Water Bottles</h2>
+                  </div>
+                  <button 
+                    onClick={() => setActiveCategory('water-bottles')}
+                    className="text-xs font-bold text-neutral-500 hover:text-black hover:underline transition-colors mt-2 sm:mt-0"
+                  >
+                    View all bottles &rarr;
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  {/* Premium Lookbook Promotional Banner Card (1/3 wide) */}
+                  <div className="lg:col-span-4 relative rounded-2xl overflow-hidden aspect-4/5 lg:aspect-auto bg-neutral-900 text-white min-h-[350px] lg:min-h-full flex flex-col justify-end p-6 sm:p-8 shadow-md group">
+                    <img 
+                      src="https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&q=80&w=600" 
+                      alt="Water Bottles Lookbook" 
+                      className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
+                    
+                    <div className="relative z-10 text-left space-y-3">
+                      <span className="bg-white text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-white/10">
+                        BPA FREE HYDRATION
+                      </span>
+                      <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
+                        Insulated Thermal Flasks
+                      </h3>
+                      <p className="text-zinc-200 text-xs">
+                        Keep liquids cold up to 24 hours or steaming hot for 12 hours with smart leakproof travel options.
+                      </p>
+                      <div className="pt-2">
+                        <button 
+                          onClick={() => setActiveCategory('water-bottles')}
+                          className="bg-white text-black hover:bg-zinc-100 hover:text-black px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                        >
+                          Shop Bottles
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3-Column Product List (2/3 wide) */}
+                  <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    {products.filter(p => p.category === 'water-bottles').slice(0, 3).map((prod) => (
+                      <ProductCard
+                        key={prod.id}
+                        product={prod}
+                        onViewDetails={setSelectedProduct}
+                        onAddToCart={(p) => handleAddToCart(p, 1)}
+                        isItemInCart={cartItems.some(item => item.product.id === prod.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
 
         </div>
       )}
@@ -1167,255 +1229,261 @@ export default function App() {
       </section>
 
       {/* 7. Standalone Customer Reviews Banner */}
-      <section className="bg-neutral-950 py-16 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase font-mono">Verified Testimonials</span>
-          <h2 className="font-display text-2xl sm:text-3xl font-black mt-1 text-white">What Happy Moms Say</h2>
-          
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {REVIEWS.map((rev) => (
-              <div key={rev.id} className="bg-zinc-900 border border-white/5 p-6 rounded-2xl text-left flex flex-col justify-between shadow-lg">
-                <div>
-                  <div className="flex text-white gap-0.5">
-                    {Array.from({ length: rev.rating }).map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-current text-white" />
-                    ))}
+      {layoutConfig.showReviews && (
+        <section className="bg-neutral-950 py-16 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <span className="text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase font-mono">Verified Testimonials</span>
+            <h2 className="font-display text-2xl sm:text-3xl font-black mt-1 text-white">What Happy Moms Say</h2>
+            
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+              {REVIEWS.map((rev) => (
+                <div key={rev.id} className="bg-zinc-900 border border-white/5 p-6 rounded-2xl text-left flex flex-col justify-between shadow-lg">
+                  <div>
+                    <div className="flex text-white gap-0.5">
+                      {Array.from({ length: rev.rating }).map((_, i) => (
+                        <Star key={i} className="h-4 w-4 fill-current text-white" />
+                      ))}
+                    </div>
+                    <p className="text-zinc-300 text-xs italic mt-4 leading-relaxed font-medium">
+                      "{rev.text}"
+                    </p>
                   </div>
-                  <p className="text-zinc-300 text-xs italic mt-4 leading-relaxed font-medium">
-                    "{rev.text}"
-                  </p>
+                  
+                  <div className="mt-6 pt-4 border-t border-white/5 flex justify-between items-center">
+                    <span className="text-xs font-bold text-white pr-4">{rev.writer}</span>
+                    <span className="text-[10px] text-zinc-500 font-mono">{rev.date}</span>
+                  </div>
                 </div>
-                
-                <div className="mt-6 pt-4 border-t border-white/5 flex justify-between items-center">
-                  <span className="text-xs font-bold text-white pr-4">{rev.writer}</span>
-                  <span className="text-[10px] text-zinc-500 font-mono">{rev.date}</span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 8. Contact Desk Form & Address Info Location Desk Grid */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-12 gap-12 items-start text-left">
-        
-        {/* left column coordinates address details info */}
-        <div className="md:col-span-5 bg-white border border-neutral-200 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm">
-          <div className="flex items-center gap-2.5">
-            <Phone className="h-5.5 w-5.5 text-black" />
-            <h3 className="font-display text-lg font-bold text-neutral-900 uppercase tracking-tight">Contact Desk</h3>
-          </div>
+      {layoutConfig.showInquiry && (
+        <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-12 gap-12 items-start text-left">
           
-          <p className="text-xs text-neutral-500 leading-relaxed border-b border-neutral-200 pb-4">
-            Have queries regarding matching sizing, gift packaging bundles, or custom orders? Reach out immediately to our Karachi assistance hotlines.
-          </p>
-
-          <div className="space-y-4">
-            <div className="flex items-start gap-3.5 text-left">
-              <MapPin className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Boutique & Warehouse:</h4>
-                <p className="text-xs text-neutral-600 mt-1 whitespace-pre-line">The Sweet Baby Shop, Liaquatabad Town, Karachi, Pakistan</p>
-              </div>
+          {/* left column coordinates address details info */}
+          <div className="md:col-span-5 bg-white border border-neutral-200 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm">
+            <div className="flex items-center gap-2.5">
+              <Phone className="h-5.5 w-5.5 text-black" />
+              <h3 className="font-display text-lg font-bold text-neutral-900 uppercase tracking-tight">Contact Desk</h3>
             </div>
+            
+            <p className="text-xs text-neutral-500 leading-relaxed border-b border-neutral-200 pb-4">
+              Have queries regarding matching sizing, gift packaging bundles, or custom orders? Reach out immediately to our Karachi assistance hotlines.
+            </p>
 
-            <div className="flex items-start gap-3.5 text-left">
-              <Phone className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Call Line Support:</h4>
-                <div className="space-y-1 mt-1 font-mono text-xs font-extrabold text-neutral-800">
-                  <a href="tel:+923303511464" className="hover:underline block">
-                    +92 330 3511464
+            <div className="space-y-4">
+              <div className="flex items-start gap-3.5 text-left">
+                <MapPin className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Boutique & Warehouse:</h4>
+                  <p className="text-xs text-neutral-600 mt-1 whitespace-pre-line">The Sweet Baby Shop, Liaquatabad Town, Karachi, Pakistan</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3.5 text-left">
+                <Phone className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Call Line Support:</h4>
+                  <div className="space-y-1 mt-1 font-mono text-xs font-extrabold text-neutral-800">
+                    <a href="tel:+923303511464" className="hover:underline block">
+                      +92 330 3511464
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3.5 text-left">
+                <Mail className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Official Email:</h4>
+                  <a href="mailto:support@thesweetbabyshop.com" className="text-xs font-extrabold text-neutral-800 hover:underline mt-1 block font-mono">
+                    support@thesweetbabyshop.com
                   </a>
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-start gap-3.5 text-left">
-              <Mail className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Official Email:</h4>
-                <a href="mailto:support@thesweetbabyshop.com" className="text-xs font-extrabold text-neutral-800 hover:underline mt-1 block font-mono">
-                  support@thesweetbabyshop.com
-                </a>
+              <div className="flex items-start gap-3.5 text-left">
+                <Clock className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Timings Open:</h4>
+                  <p className="text-xs text-neutral-600 mt-1">Monday – Saturday | 10:00 AM - 09:30 PM</p>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-start gap-3.5 text-left">
-              <Clock className="h-5 w-5 text-neutral-900 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-tight">Timings Open:</h4>
-                <p className="text-xs text-neutral-600 mt-1">Monday – Saturday | 10:00 AM - 09:30 PM</p>
+            {/* Simple neat map graphic mock */}
+            <div className="h-28 bg-neutral-50 border border-neutral-200 rounded-xl overflow-hidden relative flex items-center justify-center p-3">
+              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]" />
+              <div className="relative text-center">
+                <MapPin className="h-5 w-5 text-black mx-auto mb-1 animate-bounce" />
+                <span className="text-[10px] uppercase font-bold text-neutral-900 tracking-wider block">Liaquatabad Karachi</span>
+                <span className="text-[8px] text-neutral-500 font-mono mt-0.5 block">24.9080° N, 67.0423° E</span>
               </div>
             </div>
           </div>
 
-          {/* Simple neat map graphic mock */}
-          <div className="h-28 bg-neutral-50 border border-neutral-200 rounded-xl overflow-hidden relative flex items-center justify-center p-3">
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]" />
-            <div className="relative text-center">
-              <MapPin className="h-5 w-5 text-black mx-auto mb-1 animate-bounce" />
-              <span className="text-[10px] uppercase font-bold text-neutral-900 tracking-wider block">Liaquatabad Karachi</span>
-              <span className="text-[8px] text-neutral-500 font-mono mt-0.5 block">24.9080° N, 67.0423° E</span>
-            </div>
-          </div>
-        </div>
+          {/* right column enquiry forms */}
+          <div className="md:col-span-7 bg-white border border-neutral-200 rounded-2xl p-6 md:p-8 shadow-sm">
+            <h3 className="font-display text-lg font-bold text-neutral-900 uppercase tracking-tight">Send Us A Direct Query</h3>
+            <p className="text-xs text-neutral-500 mt-1">Submit your baby specifications and clothing requests. Our staff will check live stock and respond on WhatsApp.</p>
+            
+            <form onSubmit={handleInquirySubmit} className="mt-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                <div>
+                  <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-wider font-mono">Your Full Name: *</label>
+                  <input 
+                    type="text" 
+                    value={inquiryName}
+                    onChange={(e) => setInquiryName(e.target.value)}
+                    placeholder="Enter full name"
+                    required
+                    className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-bold text-neutral-900"
+                  />
+                </div>
 
-        {/* right column enquiry forms */}
-        <div className="md:col-span-7 bg-white border border-neutral-200 rounded-2xl p-6 md:p-8 shadow-sm">
-          <h3 className="font-display text-lg font-bold text-neutral-900 uppercase tracking-tight">Send Us A Direct Query</h3>
-          <p className="text-xs text-neutral-500 mt-1">Submit your baby specifications and clothing requests. Our staff will check live stock and respond on WhatsApp.</p>
-          
-          <form onSubmit={handleInquirySubmit} className="mt-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-              <div>
-                <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-wider font-mono">Your Full Name: *</label>
-                <input 
-                  type="text" 
-                  value={inquiryName}
-                  onChange={(e) => setInquiryName(e.target.value)}
-                  placeholder="Enter full name"
+                <div>
+                  <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-wider font-mono">WhatsApp Mobile No: *</label>
+                  <input 
+                    type="tel" 
+                    value={inquiryPhone}
+                    onChange={(e) => setInquiryPhone(e.target.value)}
+                    placeholder="e.g. 03303511464"
+                    required
+                    className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-mono font-bold text-neutral-900"
+                  />
+                </div>
+              </div>
+
+              <div className="text-left">
+                <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-wider font-mono">Your Inquiry / Sizing details: *</label>
+                <textarea 
+                  rows={3}
+                  value={inquiryMessage}
+                  onChange={(e) => setInquiryMessage(e.target.value)}
+                  placeholder="Describe baby height/weight or custom garment combinations required..."
                   required
                   className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-bold text-neutral-900"
                 />
               </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-wider font-mono">WhatsApp Mobile No: *</label>
-                <input 
-                  type="tel" 
-                  value={inquiryPhone}
-                  onChange={(e) => setInquiryPhone(e.target.value)}
-                  placeholder="e.g. 03303511464"
-                  required
-                  className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-mono font-bold text-neutral-900"
-                />
-              </div>
-            </div>
+              <button
+                type="submit"
+                disabled={inquirySubmitted}
+                className="w-full bg-black hover:bg-neutral-900 text-white font-bold text-xs tracking-wider uppercase py-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {inquirySubmitted ? (
+                  <>Loading...</>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    <span>Transmit Inquiry</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
 
-            <div className="text-left">
-              <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-wider font-mono">Your Inquiry / Sizing details: *</label>
-              <textarea 
-                rows={3}
-                value={inquiryMessage}
-                onChange={(e) => setInquiryMessage(e.target.value)}
-                placeholder="Describe baby height/weight or custom garment combinations required..."
-                required
-                className="w-full mt-1.5 bg-neutral-50 border border-neutral-200 rounded-lg px-3.5 py-3 text-xs focus:ring-1 focus:ring-black focus:outline-hidden font-bold text-neutral-900"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={inquirySubmitted}
-              className="w-full bg-black hover:bg-neutral-900 text-white font-bold text-xs tracking-wider uppercase py-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              {inquirySubmitted ? (
-                <>Loading...</>
-              ) : (
-                <>
-                  <Send className="h-4 w-4" />
-                  <span>Transmit Inquiry</span>
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-
-      </section>
+        </section>
+      )}
 
       {/* 9. Brand footer area panel */}
-      <footer className="mt-auto bg-neutral-900 text-white pt-16 pb-12 text-left">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-10">
-          
-          {/* Brand details and logo */}
-          <div className="md:col-span-5 space-y-4">
-            <div className="bg-white p-3.5 rounded-2xl max-w-[14rem] flex justify-center items-center shadow-md">
-              <Logo size="sm" showPhone={false} className="scale-95" />
-            </div>
-            <p className="text-zinc-400 text-xs leading-relaxed max-w-sm pt-2">
-              The Sweet Baby Shop is Pakistan's premier digital storefront for lovable, premium combed-cotton apparel, starter sets, playful kids clothing, and cute accessories crafted for ultimate childhood comfort.
-            </p>
-            <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest pt-2">
-              👶 Premium Softness • Liaquatabad Karachi
-            </div>
-          </div>
-
-          {/* Links Quick column */}
-          <div className="md:col-span-3 space-y-4">
-            <h4 className="font-display text-xs font-black uppercase tracking-wider text-zinc-200">Shop Collections</h4>
-            <div className="flex flex-col gap-2 text-zinc-400 text-xs">
-              {CATEGORIES.slice(0, 4).map((c) => (
-                <button 
-                  key={c.id} 
-                  onClick={() => {
-                    setActiveCategory(c.id);
-                    document.getElementById('product-catalog-grid')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className="hover:text-white transition-colors text-left font-semibold cursor-pointer"
-                >
-                  Shop Cute {c.name.split(' & ')[0]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Guidelines Links column */}
-          <div className="md:col-span-4 space-y-4 text-xs font-mono">
-            <h4 className="font-display text-xs font-black uppercase tracking-wider text-white">Trust Badges</h4>
-            <div className="space-y-3 pt-1 text-zinc-400 font-sans">
-              <p className="flex items-center gap-2.5">
-                <Truck className="h-4.5 w-4.5 shrink-0 text-zinc-400" />
-                <span>Nationwide Pakistan Delivery COD</span>
-              </p>
-              <p className="flex items-center gap-2.5">
-                <ShieldCheck className="h-4.5 w-4.5 shrink-0 text-zinc-400" />
-                <span>Non-Allergenic 100% Baby Cotton Verified</span>
-              </p>
-              <p className="flex items-center gap-2.5">
-                <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-zinc-400" />
-                <span>Guaranteed Direct Factory Rates</span>
-              </p>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Copy bar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-neutral-850 mt-12 pt-8 space-y-4 text-zinc-500 text-[11px] font-mono text-center sm:text-left">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <span>&copy; {new Date().getFullYear()} The Sweet Baby Shop. All Rights Reserved.</span>
-            <div className="flex gap-4">
-              <a href="#" className="hover:text-white transition-colors">Safety Standard</a>
-              <span>•</span>
-              <a href="#" className="hover:text-white transition-colors">Terms of Love</a>
-            </div>
-          </div>
-
-          {/* User-provided metadata info directly in footer */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-left">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-zinc-400 animate-pulse"></span>
-                <span className="text-white font-bold uppercase tracking-wider text-[10px]">Database Connection Status</span>
-              </div>
-              <p className="text-zinc-400 text-[10px]">
-                Connected to project <strong className="text-white">vwoqpxljyxqacadnpgfk</strong> | Owner Node <strong className="text-white">thesweetbabyshop@gmail.com</strong>
-              </p>
-              <div className="text-[9px] text-zinc-500 overflow-hidden text-ellipsis whitespace-nowrap max-w-[280px] sm:max-w-md">
-                Publishable Key: sb_publishable_8imO92Hxr2KGilgnAbNsVw_Dho4Vc9q
-              </div>
-            </div>
+      {layoutConfig.showFooter && (
+        <footer className="mt-auto bg-neutral-900 text-white pt-16 pb-12 text-left">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-10">
             
-            <button
-              onClick={() => setIsManagerOpen(true)}
-              className="px-4 py-2 bg-white text-black text-[10px] font-extrabold uppercase rounded-xl hover:bg-zinc-100 transition-colors shrink-0 tracking-wide cursor-pointer flex items-center gap-1.5"
-            >
-              🔐 Admin Panel & CRM Access
-            </button>
+            {/* Brand details and logo */}
+            <div className="md:col-span-5 space-y-4">
+              <div className="bg-white p-3.5 rounded-2xl max-w-[14rem] flex justify-center items-center shadow-md">
+                <Logo size="sm" showPhone={false} className="scale-95" />
+              </div>
+              <p className="text-zinc-400 text-xs leading-relaxed max-w-sm pt-2">
+                The Sweet Baby Shop is Pakistan's premier digital storefront for lovable, premium combed-cotton apparel, starter sets, playful kids clothing, and cute accessories crafted for ultimate childhood comfort.
+              </p>
+              <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest pt-2">
+                👶 Premium Softness • Liaquatabad Karachi
+              </div>
+            </div>
+
+            {/* Links Quick column */}
+            <div className="md:col-span-3 space-y-4">
+              <h4 className="font-display text-xs font-black uppercase tracking-wider text-zinc-200">Shop Collections</h4>
+              <div className="flex flex-col gap-2 text-zinc-400 text-xs">
+                {CATEGORIES.slice(0, 4).map((c) => (
+                  <button 
+                    key={c.id} 
+                    onClick={() => {
+                      setActiveCategory(c.id);
+                      document.getElementById('product-catalog-grid')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="hover:text-white transition-colors text-left font-semibold cursor-pointer"
+                  >
+                    Shop Cute {c.name.split(' & ')[0]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Guidelines Links column */}
+            <div className="md:col-span-4 space-y-4 text-xs font-mono">
+              <h4 className="font-display text-xs font-black uppercase tracking-wider text-white">Trust Badges</h4>
+              <div className="space-y-3 pt-1 text-zinc-400 font-sans">
+                <p className="flex items-center gap-2.5">
+                  <Truck className="h-4.5 w-4.5 shrink-0 text-zinc-400" />
+                  <span>Nationwide Pakistan Delivery COD</span>
+                </p>
+                <p className="flex items-center gap-2.5">
+                  <ShieldCheck className="h-4.5 w-4.5 shrink-0 text-zinc-400" />
+                  <span>Non-Allergenic 100% Baby Cotton Verified</span>
+                </p>
+                <p className="flex items-center gap-2.5">
+                  <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-zinc-400" />
+                  <span>Guaranteed Direct Factory Rates</span>
+                </p>
+              </div>
+            </div>
+
           </div>
-        </div>
-      </footer>
+
+          {/* Copy bar */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-neutral-850 mt-12 pt-8 space-y-4 text-zinc-500 text-[11px] font-mono text-center sm:text-left">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <span>&copy; {new Date().getFullYear()} The Sweet Baby Shop. All Rights Reserved.</span>
+              <div className="flex gap-4">
+                <a href="#" className="hover:text-white transition-colors">Safety Standard</a>
+                <span>•</span>
+                <a href="#" className="hover:text-white transition-colors">Terms of Love</a>
+              </div>
+            </div>
+
+            {/* User-provided metadata info directly in footer */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-left">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-zinc-400 animate-pulse"></span>
+                  <span className="text-white font-bold uppercase tracking-wider text-[10px]">Database Connection Status</span>
+                </div>
+                <p className="text-zinc-400 text-[10px]">
+                  Connected to project <strong className="text-white">vwoqpxljyxqacadnpgfk</strong> | Owner Node <strong className="text-white">thesweetbabyshop@gmail.com</strong>
+                </p>
+                <div className="text-[9px] text-zinc-500 overflow-hidden text-ellipsis whitespace-nowrap max-w-[280px] sm:max-w-md">
+                  Publishable Key: sb_publishable_8imO92Hxr2KGilgnAbNsVw_Dho4Vc9q
+                </div>
+              </div>
+              
+              <button
+                onClick={() => setIsManagerOpen(true)}
+                className="px-4 py-2 bg-white text-black text-[10px] font-extrabold uppercase rounded-xl hover:bg-zinc-100 transition-colors shrink-0 tracking-wide cursor-pointer flex items-center gap-1.5"
+              >
+                🔐 Admin Panel & CRM Access
+              </button>
+            </div>
+          </div>
+        </footer>
+      )}
 
       {/* 10. Sticky WhatsApp Floating badge indicator clickable bottom right */}
       <a
@@ -1502,6 +1570,8 @@ export default function App() {
             onSaveSlides={saveSlidesToStorage}
             sessionOrders={orders}
             onSimulateStatus={handleSimulateStatus}
+            layoutConfig={layoutConfig}
+            onSaveLayoutConfig={saveLayoutConfigToStorage}
           />
         )}
       </AnimatePresence>
