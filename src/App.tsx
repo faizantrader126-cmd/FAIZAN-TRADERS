@@ -170,6 +170,24 @@ export default function App() {
     }
   }, [slides, currentSlideIdx]);
 
+  // Load products from Supabase asynchronously if custom Supabase URL is active
+  useEffect(() => {
+    const hasCustomSupabase = localStorage.getItem('custom_supabase_url');
+    if (hasCustomSupabase) {
+      import('./lib/supabase').then(({ fetchProductsFromSupabase }) => {
+        fetchProductsFromSupabase().then((res) => {
+          if (res.success && res.data && res.data.length > 0) {
+            console.log('Synchronized products catalogue live from connected Supabase node.');
+            setProducts(res.data);
+            localStorage.setItem('faizan_traders_products', JSON.stringify(res.data));
+          }
+        });
+      }).catch(err => {
+        console.error('Failed to dynamic import supabase helpers:', err);
+      });
+    }
+  }, []);
+
   // Flash sales deal countdown
   const [countdown, setCountdown] = useState({ hours: 4, minutes: 34, seconds: 12 });
 

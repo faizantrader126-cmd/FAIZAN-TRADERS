@@ -166,3 +166,142 @@ export async function saveOrderToSupabase(order: any) {
     return { success: false, error: catchErr.message || catchErr };
   }
 }
+
+/**
+ * Maps a frontend Product object to Supabase column format (snake_case).
+ */
+export function mapToSupabaseProduct(p: any) {
+  return {
+    id: p.id,
+    name: p.name,
+    price: Number(p.price || 0),
+    original_price: Number(p.originalPrice ?? p.original_price ?? p.price ?? 0),
+    description: p.description || '',
+    long_description: p.longDescription ?? p.long_description ?? '',
+    image: p.image || '',
+    images: p.images ?? [],
+    rating: Number(p.rating ?? 5),
+    reviews_count: Number(p.reviewsCount ?? p.reviews_count ?? 0),
+    category: p.category || 'all',
+    features: p.features ?? [],
+    variants: p.variants ?? [],
+    sizes: p.sizes ?? [],
+    variant_images: p.variantImages ?? p.variant_images ?? {},
+    stock: Number(p.stock ?? 10),
+    badge: p.badge || null
+  };
+}
+
+/**
+ * Maps a Supabase row back into a frontend Product model (camelCase).
+ */
+export function mapFromSupabaseProduct(row: any) {
+  return {
+    id: row.id,
+    name: row.name,
+    price: Number(row.price || 0),
+    originalPrice: Number(row.original_price ?? row.originalPrice ?? row.price ?? 0),
+    description: row.description || '',
+    longDescription: row.long_description ?? row.longDescription ?? '',
+    image: row.image || '',
+    images: row.images ?? [],
+    rating: Number(row.rating ?? 5),
+    reviewsCount: Number(row.reviews_count ?? row.reviewsCount ?? 0),
+    category: row.category || 'all',
+    features: row.features ?? [],
+    variants: row.variants ?? [],
+    sizes: row.sizes ?? [],
+    variantImages: row.variant_images ?? row.variantImages ?? {},
+    stock: Number(row.stock ?? 10),
+    badge: row.badge || undefined
+  };
+}
+
+/**
+ * Fetches all products from Supabase 'products' table.
+ */
+export async function fetchProductsFromSupabase() {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Supabase fetchProducts error:', error.message);
+      return { success: false, error: error.message };
+    }
+
+    const mapped = (data || []).map(mapFromSupabaseProduct);
+    return { success: true, data: mapped };
+  } catch (err: any) {
+    console.error('Exception fetching products:', err);
+    return { success: false, error: err.message || err };
+  }
+}
+
+/**
+ * Upserts a single product to Supabase.
+ */
+export async function upsertProductToSupabase(product: any) {
+  const payload = mapToSupabaseProduct(product);
+  try {
+    const { error } = await supabase
+      .from('products')
+      .upsert([payload], { onConflict: 'id' });
+
+    if (error) {
+      console.error('Supabase upsertProduct error:', error.message);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('Exception upserting product:', err);
+    return { success: false, error: err.message || err };
+  }
+}
+
+/**
+ * Deletes a product from Supabase.
+ */
+export async function deleteProductFromSupabase(productId: string) {
+  try {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', productId);
+
+    if (error) {
+      console.error('Supabase deleteProduct error:', error.message);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('Exception deleting product:', err);
+    return { success: false, error: err.message || err };
+  }
+}
+
+/**
+ * Pushes a batch of products to Supabase to seed/sync them all at once.
+ */
+export async function pushAllProductsToSupabase(products: any[]) {
+  const payloads = products.map(mapToSupabaseProduct);
+  try {
+    const { error } = await supabase
+      .from('products')
+      .upsert(payloads, { onConflict: 'id' });
+
+    if (error) {
+      console.error('Supabase pushAllProducts error:', error.message);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('Exception pushing products:', err);
+    return { success: false, error: err.message || err };
+  }
+}

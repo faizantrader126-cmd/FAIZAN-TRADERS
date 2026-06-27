@@ -6,7 +6,7 @@ import {
   ArrowLeft, Image, Check, AlertTriangle, Layers, Info, Sparkles, Upload,
   TrendingUp, Coins, Database, MailOpen, LayoutDashboard, Eye, Lock, Unlock, Loader2, ExternalLink, Trash, Palette
 } from 'lucide-react';
-import { supabase, supabaseUrl, supabaseKey } from '../lib/supabase';
+import { supabase, supabaseUrl, supabaseKey, upsertProductToSupabase, deleteProductFromSupabase, pushAllProductsToSupabase, fetchProductsFromSupabase } from '../lib/supabase';
 import { getSavedTheme, saveAndApplyTheme, THEME_PRESETS, ThemeConfig } from '../lib/theme';
 
 
@@ -118,6 +118,69 @@ function compressImage(
   });
 }
 
+/**
+ * Uploads an image file to a free, high-performance public CDN/image hosting service.
+ * If the upload fails, it falls back to the local compressImage base64 format.
+ */
+async function uploadImageToCloud(
+  file: File, 
+  onProgressChange?: (uploading: boolean) => void
+): Promise<string> {
+  if (onProgressChange) onProgressChange(true);
+  
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Method 1: Try telegra.ph (anonymous, direct file hosting, very fast CDN, completely free without keys)
+    const res = await fetch('https://telegra.ph/upload', {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data[0]?.src) {
+        if (onProgressChange) onProgressChange(false);
+        return 'https://telegra.ph' + data[0].src;
+      }
+    }
+  } catch (err) {
+    console.warn('Primary image uploader (telegra.ph) failed, trying backup...', err);
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Method 2: Try Platzi Escuelajs Files Upload API (very popular backup, fast, free, returns direct link)
+    const res = await fetch('https://api.escuelajs.co/api/v1/files/upload', {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.location) {
+        if (onProgressChange) onProgressChange(false);
+        return data.location;
+      }
+    }
+  } catch (err) {
+    console.warn('Backup uploader (Platzi) failed, using local fallback...', err);
+  }
+
+  // Method 3: Fallback to local compressed base64 representation if offline or all upload services fail
+  try {
+    const compressed = await compressImage(file);
+    if (onProgressChange) onProgressChange(false);
+    return compressed;
+  } catch (err) {
+    if (onProgressChange) onProgressChange(false);
+    throw err;
+  }
+}
+
 export default function ProductManagerModal({ 
   products, 
   onClose, 
@@ -219,6 +282,67 @@ export default function ProductManagerModal({
       setSupabaseUrlInput('');
       setSupabaseAnonKeyInput('');
       window.location.reload();
+    }
+  };
+
+  // Supabase Product Sync States
+  const [productsSyncStatus, setProductsSyncStatus] = useState<'idle' | 'pushing' | 'pulling' | 'success' | 'error'>('idle');
+  const [productsSyncError, setProductsSyncError] = useState('');
+
+  const handlePushProductsToSupabase = async () => {
+    if (!localStorage.getItem('custom_supabase_url')) {
+      alert("Please connect your Supabase project first using the form above.");
+      return;
+    }
+    const confirmPush = window.confirm("Are you sure you want to push all current local products to your Supabase products table? This will overwrite products with clashing IDs inside your Supabase database.");
+    if (!confirmPush) return;
+
+    setProductsSyncStatus('pushing');
+    setProductsSyncError('');
+    try {
+      const res = await pushAllProductsToSupabase(products);
+      if (res.success) {
+        setProductsSyncStatus('success');
+        setTimeout(() => setProductsSyncStatus('idle'), 3000);
+      } else {
+        setProductsSyncStatus('error');
+        setProductsSyncError(res.error || 'Unknown error');
+        alert(`Error pushing products: ${res.error}. Make sure you have created the "products" table in your Supabase SQL editor using the SQL schema below.`);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setProductsSyncStatus('error');
+      setProductsSyncError(err.message || String(err));
+    }
+  };
+
+  const handlePullProductsFromSupabase = async () => {
+    if (!localStorage.getItem('custom_supabase_url')) {
+      alert("Please connect your Supabase project first using the form above.");
+      return;
+    }
+    setProductsSyncStatus('pulling');
+    setProductsSyncError('');
+    try {
+      const res = await fetchProductsFromSupabase();
+      if (res.success && res.data) {
+        if (res.data.length === 0) {
+          alert("No products were found inside your Supabase 'products' table. Try pushing your current products first!");
+          setProductsSyncStatus('idle');
+          return;
+        }
+        onSaveProducts(res.data);
+        setProductsSyncStatus('success');
+        setTimeout(() => setProductsSyncStatus('idle'), 3000);
+      } else {
+        setProductsSyncStatus('error');
+        setProductsSyncError(res.error || 'Unknown error');
+        alert(`Error pulling products: ${res.error}. Make sure you have created the "products" table in your Supabase SQL editor using the SQL schema below.`);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setProductsSyncStatus('error');
+      setProductsSyncError(err.message || String(err));
     }
   };
 
@@ -515,6 +639,7 @@ export default function ProductManagerModal({
   const [formVariantsList, setFormVariantsList] = useState<string[]>([]);
   const [formSizesList, setFormSizesList] = useState<string[]>([]);
   const [formVariantImages, setFormVariantImages] = useState<Record<string, string>>({});
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   
   // Helper state inputs for adding tags on Enter/Click
   const [newVariantInput, setNewVariantInput] = useState('');
@@ -659,6 +784,20 @@ export default function ProductManagerModal({
     }
 
     onSaveProducts(updatedList);
+
+    // If custom Supabase is configured, upsert to cloud database asynchronously
+    const customSupabaseActive = localStorage.getItem('custom_supabase_url');
+    if (customSupabaseActive) {
+      upsertProductToSupabase(targetProduct).then(res => {
+        if (res.success) {
+          console.log('Product successfully synced to Supabase:', targetProduct.name);
+        } else {
+          console.error('Failed to sync product to Supabase:', res.error);
+          alert(`Warning: Product saved locally but failed to sync to Supabase table "products". Error: ${res.error}. Please ensure you ran the SQL schema to create the "products" table.`);
+        }
+      });
+    }
+
     setCurrentView('list');
     setErrorMsg('');
   };
@@ -670,6 +809,18 @@ export default function ProductManagerModal({
 
     const filteredList = products.filter(p => p.id !== productId);
     onSaveProducts(filteredList);
+
+    // If custom Supabase is configured, delete from cloud database asynchronously
+    const customSupabaseActive = localStorage.getItem('custom_supabase_url');
+    if (customSupabaseActive) {
+      deleteProductFromSupabase(productId).then(res => {
+        if (res.success) {
+          console.log('Product deleted from Supabase:', productId);
+        } else {
+          console.error('Failed to delete product from Supabase:', res.error);
+        }
+      });
+    }
   };
 
   // Restore defaults
@@ -1356,6 +1507,71 @@ export default function ProductManagerModal({
                   </div>
                 </div>
 
+                {/* Cloud Catalogue Synchronization (Products Table) */}
+                <div className="bg-white border border-brand-black/5 p-4 rounded-xl space-y-3 font-sans text-left">
+                  <div className="flex items-center gap-1.5">
+                    <Database className="h-4 w-4 text-indigo-500" />
+                    <h5 className="font-bold text-xs text-brand-black uppercase tracking-wider font-mono">Cloud Catalogue Synchronization</h5>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 leading-relaxed">
+                    By sync'ing products with your Supabase database, you can manage items, stock levels, and prices from anywhere! All visitors to your website will instantly see your latest live products.
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <button
+                      type="button"
+                      disabled={productsSyncStatus !== 'idle'}
+                      onClick={handlePushProductsToSupabase}
+                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-all"
+                    >
+                      {productsSyncStatus === 'pushing' ? (
+                        <>
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Pushing to Cloud...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-3 w-3" />
+                          Push Local Products to Supabase
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={productsSyncStatus !== 'idle'}
+                      onClick={handlePullProductsFromSupabase}
+                      className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 disabled:opacity-50 text-zinc-800 rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-all border border-zinc-200"
+                    >
+                      {productsSyncStatus === 'pulling' ? (
+                        <>
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Pulling from Cloud...
+                        </>
+                      ) : (
+                        <>
+                          <RotateCcw className="h-3 w-3" />
+                          Pull Products from Supabase
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {productsSyncStatus === 'success' && (
+                    <div className="text-[10px] text-emerald-600 font-bold flex items-center gap-1 animate-pulse">
+                      <Check className="h-3.5 w-3.5 text-emerald-500" />
+                      Success! Products are fully synchronized with Supabase.
+                    </div>
+                  )}
+
+                  {productsSyncStatus === 'error' && (
+                    <div className="text-[10px] text-rose-600 font-bold flex items-center gap-1">
+                      <AlertTriangle className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                      Sync failed: {productsSyncError}
+                    </div>
+                  )}
+                </div>
+
                 <p className="font-sans text-zinc-600">
                   To receive and query bookings or purchases, please log in to your <strong>Supabase Dashboard (Project ID: {supabaseUrl ? (supabaseUrl.replace('https://', '').split('.')[0] || 'vwoqpxljyxqacadnpgfk') : 'vwoqpxljyxqacadnpgfk'})</strong>, navigate to the <strong>SQL Editor</strong>, and paste the database tables schema below to create the required tables:
                 </p>
@@ -1384,6 +1600,28 @@ CREATE TABLE IF NOT EXISTS orders (
   shipping_cost numeric NOT NULL,
   status text NOT NULL DEFAULT 'Pending',
   payment_method text NOT NULL,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 3. Create Products Table
+CREATE TABLE IF NOT EXISTS products (
+  id text PRIMARY KEY,
+  name text NOT NULL,
+  price numeric NOT NULL,
+  original_price numeric NOT NULL,
+  description text,
+  long_description text,
+  image text NOT NULL,
+  images text[] DEFAULT '{}',
+  rating numeric DEFAULT 5,
+  reviews_count numeric DEFAULT 0,
+  category text NOT NULL,
+  features text[] DEFAULT '{}',
+  variants text[] DEFAULT '{}',
+  sizes text[] DEFAULT '{}',
+  variant_images jsonb DEFAULT '{}'::jsonb,
+  stock numeric DEFAULT 10,
+  badge text,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );`}
                 </pre>
@@ -1717,32 +1955,37 @@ CREATE TABLE IF NOT EXISTS orders (
                     id="logo-file-uploader"
                     accept="image/*"
                     className="hidden"
+                    disabled={isUploadingImage}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      compressImage(file, 400, 200, 0.8)
-                        .then((compressed) => {
-                          setCustomLogo(compressed);
+                      uploadImageToCloud(file, setIsUploadingImage)
+                        .then((url) => {
+                          setCustomLogo(url);
                         })
                         .catch((err) => {
-                          console.error('Logo compression error:', err);
-                          const reader = new FileReader();
-                          reader.onload = (event) => {
-                            if (event.target?.result) {
-                              setCustomLogo(event.target.result as string);
-                            }
-                          };
-                          reader.readAsDataURL(file);
+                          console.error('Logo upload error:', err);
+                          alert("Failed to upload logo image. Please try again.");
                         });
                     }}
                   />
                   <button
                     type="button"
+                    disabled={isUploadingImage}
                     onClick={() => document.getElementById('logo-file-uploader')?.click()}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-brand-black/25 bg-white p-3 text-[11px] font-bold text-brand-black hover:bg-brand-lightgray hover:border-brand-black transition-all cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-brand-black/25 bg-white p-3 text-[11px] font-bold text-brand-black hover:bg-brand-lightgray hover:border-brand-black disabled:opacity-50 transition-all cursor-pointer"
                   >
-                    <Upload className="h-4 w-4 text-brand-gold shrink-0" />
-                    <span>Upload Logo File 📁</span>
+                    {isUploadingImage ? (
+                      <>
+                        <Loader2 className="h-4 w-4 text-brand-gold animate-spin shrink-0" />
+                        <span>Uploading logo file... ☁️</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 text-brand-gold shrink-0" />
+                        <span>Upload Logo File 📁</span>
+                      </>
+                    )}
                   </button>
                 </div>
 
@@ -2529,6 +2772,11 @@ CREATE TABLE IF NOT EXISTS orders (
                                       <X className="h-2 w-2" />
                                     </button>
                                   </>
+                                ) : isUploadingImage ? (
+                                  <div className="flex flex-col items-center justify-center p-1 text-zinc-400">
+                                    <Loader2 className="h-3 w-3 text-brand-gold animate-spin shrink-0 mb-0.5" />
+                                    <span className="text-[7px] font-bold text-zinc-400 uppercase tracking-wide">Syncing...</span>
+                                  </div>
                                 ) : (
                                   <div className="flex flex-col items-center justify-center p-1 text-zinc-400">
                                     <Upload className="h-3 w-3 text-brand-gold shrink-0 mb-0.5" />
@@ -2539,27 +2787,20 @@ CREATE TABLE IF NOT EXISTS orders (
                                   type="file"
                                   accept="image/*"
                                   className="absolute inset-0 opacity-0 cursor-pointer"
+                                  disabled={isUploadingImage}
                                   onChange={(e: any) => {
                                     const file = e.target.files?.[0];
                                     if (!file) return;
-                                    compressImage(file).then((compressed) => {
-                                      setFormVariantImages(prev => ({
-                                        ...prev,
-                                        [val]: compressed
-                                      }));
-                                    }).catch((err) => {
-                                      console.error("Compression error:", err);
-                                      const reader = new FileReader();
-                                      reader.onload = (event) => {
-                                        if (event.target?.result) {
-                                          setFormVariantImages(prev => ({
-                                            ...prev,
-                                            [val]: event.target!.result as string
-                                          }));
-                                        }
-                                      };
-                                      reader.readAsDataURL(file);
-                                    });
+                                    uploadImageToCloud(file, setIsUploadingImage)
+                                      .then((url) => {
+                                        setFormVariantImages(prev => ({
+                                          ...prev,
+                                          [val]: url
+                                        }));
+                                      })
+                                      .catch((err) => {
+                                        console.error("Variant image upload error:", err);
+                                      });
                                   }}
                                 />
                               </div>
@@ -2615,31 +2856,38 @@ CREATE TABLE IF NOT EXISTS orders (
                         id="local-file-uploader"
                         accept="image/*"
                         className="hidden"
+                        disabled={isUploadingImage}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
                           
-                          compressImage(file).then((compressed) => {
-                            setFormImage(compressed);
-                          }).catch((err) => {
-                            console.error("Compression error:", err);
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              if (event.target?.result) {
-                                setFormImage(event.target.result as string);
-                              }
-                            };
-                            reader.readAsDataURL(file);
-                          });
+                          uploadImageToCloud(file, setIsUploadingImage)
+                            .then((url) => {
+                              setFormImage(url);
+                            })
+                            .catch((err) => {
+                              console.error("Cloud upload error:", err);
+                              alert("Failed to upload image. Please try again.");
+                            });
                         }}
                       />
                       <button
                         type="button"
+                        disabled={isUploadingImage}
                         onClick={() => document.getElementById('local-file-uploader')?.click()}
-                        className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-brand-black/25 bg-white p-2.5 text-[11px] font-bold text-brand-black hover:bg-brand-lightgray hover:border-brand-black transition-all cursor-pointer"
+                        className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-brand-black/25 bg-white p-2.5 text-[11px] font-bold text-brand-black hover:bg-brand-lightgray hover:border-brand-black disabled:opacity-50 transition-all cursor-pointer"
                       >
-                        <Upload className="h-4 w-4 text-brand-gold shrink-0" />
-                        <span>Add Photo / Upload Image 📁</span>
+                        {isUploadingImage ? (
+                          <>
+                            <Loader2 className="h-4 w-4 text-brand-gold animate-spin shrink-0" />
+                            <span>Uploading photo to secure cloud... ☁️</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4 text-brand-gold shrink-0" />
+                            <span>Add Photo / Upload Image 📁</span>
+                          </>
+                        )}
                       </button>
                     </div>
                     
@@ -2711,34 +2959,46 @@ CREATE TABLE IF NOT EXISTS orders (
                         accept="image/*"
                         className="hidden"
                         multiple
+                        disabled={isUploadingImage}
                         onChange={(e) => {
                           const files = e.target.files;
                           if (!files || files.length === 0) return;
                           
-                          Array.from(files).forEach((file: any) => {
-                            compressImage(file).then((compressed) => {
-                              setFormImages(prev => [...prev, compressed]);
-                            }).catch((err) => {
-                              console.error("Compression error:", err);
-                              const reader = new FileReader();
-                              reader.onload = (event) => {
-                                if (event.target?.result) {
-                                  setFormImages(prev => [...prev, event.target!.result as string]);
-                                }
-                              };
-                              reader.readAsDataURL(file);
-                            });
+                          setIsUploadingImage(true);
+                          const uploadPromises = Array.from(files).map((file: any) => 
+                            uploadImageToCloud(file).catch((err) => {
+                              console.error("Gallery upload error:", err);
+                              return null;
+                            })
+                          );
+
+                          Promise.all(uploadPromises).then((urls) => {
+                            const validUrls = urls.filter(Boolean) as string[];
+                            if (validUrls.length > 0) {
+                              setFormImages(prev => [...prev, ...validUrls]);
+                            }
+                            setIsUploadingImage(false);
                           });
                         }}
                       />
                       
                       <button
                         type="button"
+                        disabled={isUploadingImage}
                         onClick={() => document.getElementById('additional-photo-uploader')?.click()}
-                        className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-brand-black/15 bg-white py-2 text-[10.5px] font-bold text-brand-black hover:bg-brand-lightgray transition-all cursor-pointer"
+                        className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-brand-black/15 bg-white py-2 text-[10.5px] font-bold text-brand-black hover:bg-brand-lightgray disabled:opacity-50 transition-all cursor-pointer"
                       >
-                        <Upload className="h-3.5 w-3.5 text-brand-gold shrink-0" />
-                        <span>Upload Additional Photos 📁</span>
+                        {isUploadingImage ? (
+                          <>
+                            <Loader2 className="h-3.5 w-3.5 text-brand-gold animate-spin shrink-0" />
+                            <span>Uploading gallery photos... ☁️</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-3.5 w-3.5 text-brand-gold shrink-0" />
+                            <span>Upload Additional Photos 📁</span>
+                          </>
+                        )}
                       </button>
 
                       {/* URL-based manual entry shortcut */}
@@ -3134,28 +3394,33 @@ CREATE TABLE IF NOT EXISTS orders (
                           {/* Direct image uploader */}
                           <div className="relative border border-dashed border-zinc-300 hover:border-brand-black rounded-xl p-2.5 bg-zinc-50 hover:bg-white transition-all text-center cursor-pointer">
                             <div className="flex items-center justify-center gap-1.5 text-brand-black text-xs font-bold uppercase tracking-wide">
-                              <Upload className="h-3.5 w-3.5 text-brand-gold shrink-0" />
-                              <span>Upload Photo</span>
+                              {isUploadingImage ? (
+                                <>
+                                  <Loader2 className="h-3.5 w-3.5 text-brand-gold animate-spin shrink-0" />
+                                  <span>Syncing...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Upload className="h-3.5 w-3.5 text-brand-gold shrink-0" />
+                                  <span>Upload Photo</span>
+                                </>
+                              )}
                             </div>
                             <input
                               type="file"
                               accept="image/*"
                               className="absolute inset-0 opacity-0 cursor-pointer"
+                              disabled={isUploadingImage}
                               onChange={(e: any) => {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
-                                compressImage(file).then((compressed) => {
-                                  setLocalSlides(prev => prev.map((s, i) => i === idx ? { ...s, image: compressed } : s));
-                                }).catch((err) => {
-                                  console.error("Compression error:", err);
-                                  const reader = new FileReader();
-                                  reader.onload = (event) => {
-                                    if (event.target?.result) {
-                                      setLocalSlides(prev => prev.map((s, i) => i === idx ? { ...s, image: event.target!.result as string } : s));
-                                    }
-                                  };
-                                  reader.readAsDataURL(file);
-                                });
+                                uploadImageToCloud(file, setIsUploadingImage)
+                                  .then((url) => {
+                                    setLocalSlides(prev => prev.map((s, i) => i === idx ? { ...s, image: url } : s));
+                                  })
+                                  .catch((err) => {
+                                    console.error("Slide upload error:", err);
+                                  });
                               }}
                             />
                           </div>
