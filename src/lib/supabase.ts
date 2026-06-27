@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { getApiUrl } from './apiConfig';
 
 // Fallback legacy client in case any other direct code relies on it
 const defaultUrl = 'https://vwoqpxljyxqacadnpgfk.supabase.co';
@@ -18,7 +19,7 @@ export interface InquiryPayload {
  */
 export async function saveInquiryToSupabase(data: InquiryPayload) {
   try {
-    const res = await fetch('/api/inquiries', {
+    const res = await fetch(getApiUrl('/api/inquiries'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -40,7 +41,7 @@ export async function saveInquiryToSupabase(data: InquiryPayload) {
  */
 export async function saveOrderToSupabase(order: any) {
   try {
-    const res = await fetch('/api/orders', {
+    const res = await fetch(getApiUrl('/api/orders'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(order)
@@ -76,7 +77,7 @@ export function mapFromSupabaseProduct(row: any) {
  */
 export async function fetchProductsFromSupabase() {
   try {
-    const res = await fetch('/api/products');
+    const res = await fetch(getApiUrl('/api/products'));
     const json = await res.json();
     if (json.success && json.data) {
       return { success: true, data: json.data };
@@ -93,7 +94,7 @@ export async function fetchProductsFromSupabase() {
  */
 export async function upsertProductToSupabase(product: any) {
   try {
-    const res = await fetch('/api/products', {
+    const res = await fetch(getApiUrl('/api/products'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(product)
@@ -114,7 +115,7 @@ export async function upsertProductToSupabase(product: any) {
  */
 export async function deleteProductFromSupabase(productId: string) {
   try {
-    const res = await fetch(`/api/products/${productId}`, {
+    const res = await fetch(getApiUrl(`/api/products/${productId}`), {
       method: 'DELETE'
     });
     const json = await res.json();
@@ -133,7 +134,7 @@ export async function deleteProductFromSupabase(productId: string) {
  */
 export async function pushAllProductsToSupabase(products: any[]) {
   try {
-    const res = await fetch('/api/products/bulk', {
+    const res = await fetch(getApiUrl('/api/products/bulk'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(products)

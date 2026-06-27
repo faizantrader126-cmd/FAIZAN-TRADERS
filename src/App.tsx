@@ -12,6 +12,7 @@ import ProductManagerModal from './components/ProductManagerModal';
 import { PRODUCTS, CATEGORIES, BANNER_SLIDES, REVIEWS, COLLECTIONS } from './data';
 import { Product, CartItem, Order, BannerSlide } from './types';
 import { saveInquiryToSupabase } from './lib/supabase';
+import { getApiUrl } from './lib/apiConfig';
 
 // Icons
 import { 
@@ -149,7 +150,7 @@ export default function App() {
     safeSetLocalStorage('faizan_traders_deleted_products', JSON.stringify(deletedDefaultIds));
 
     // Post bulk changes to server to keep save cloud node fully synced
-    fetch('/api/products/bulk', {
+    fetch(getApiUrl('/api/products/bulk'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedProducts)
@@ -197,7 +198,7 @@ export default function App() {
     safeSetLocalStorage('faizan_traders_slides', JSON.stringify(updatedSlides));
 
     // Post slides to server
-    fetch('/api/slides', {
+    fetch(getApiUrl('/api/slides'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedSlides)
@@ -237,7 +238,7 @@ export default function App() {
     });
 
     // Fetch slides from Express backend
-    fetch('/api/slides')
+    fetch(getApiUrl('/api/slides'))
       .then(res => res.json())
       .then(json => {
         if (json.success && json.data && json.data.length > 0) {
@@ -248,7 +249,7 @@ export default function App() {
       .catch(err => console.error('Error fetching slides from server:', err));
 
     // Fetch orders from Express backend
-    fetch('/api/orders')
+    fetch(getApiUrl('/api/orders'))
       .then(res => res.json())
       .then(json => {
         if (json.success && json.data) {
