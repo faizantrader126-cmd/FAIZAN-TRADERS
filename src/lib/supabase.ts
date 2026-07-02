@@ -4,9 +4,27 @@ import { getApiUrl } from './apiConfig';
 // Fallback legacy client in case any other direct code relies on it
 const defaultUrl = 'https://vwoqpxljyxqacadnpgfk.supabase.co';
 const defaultKey = 'sb_publishable_8imO92Hxr2KGilgnAbNsVw_Dho4Vc9q';
-export const supabaseUrl = defaultUrl;
-export const supabaseKey = defaultKey;
-export const supabase = createClient(defaultUrl, defaultKey);
+
+let activeUrl = defaultUrl;
+let activeKey = defaultKey;
+
+if (typeof window !== 'undefined') {
+  const customUrl = localStorage.getItem('custom_supabase_url');
+  const customKey = localStorage.getItem('custom_supabase_anon_key');
+  if (customUrl) {
+    activeUrl = customUrl.trim();
+    if (!activeUrl.startsWith('http://') && !activeUrl.startsWith('https://')) {
+      activeUrl = `https://${activeUrl}.supabase.co`;
+    }
+  }
+  if (customKey) {
+    activeKey = customKey.trim();
+  }
+}
+
+export const supabaseUrl = activeUrl;
+export const supabaseKey = activeKey;
+export const supabase = createClient(activeUrl, activeKey);
 
 export interface InquiryPayload {
   name: string;

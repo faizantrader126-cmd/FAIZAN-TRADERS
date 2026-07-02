@@ -1,0 +1,37 @@
+{
+  "products": [],
+  "slides": [
+    {
+      "id": "slide-1",
+      "title": "THE HOME & LIFE BOUTIQUE",
+      "subtitle": "Premium Everyday Essentials",
+      "priceText": "Direct-to-home quality, unbeatable direct factory prices 🏠",
+      "badge": "BEDSHEETS • CLOTHING • COOL GADGETS & HOMEWARES",
+      "tagline": "FAST COD DELIVERY • NATIONWIDE PAKISTAN SUPPORT • EASY RETURNS",
+      "image": "/uploads/img_1782588103936_999_WhatsApp_Image_2026-06-26_at_10.07.17_PM__1_.jpeg",
+      "linkCategory": "all"
+    },
+    {
+      "id": "slide-mqwqd0n8",
+      "badge": "New Collection ✨",
+      "title": "Modern Living Upgrades",
+      "subtitle": "Exclusive Premium Comfort",
+      "priceText": "From Rs. 990",
+      "tagline": "Carefully custom selected household solutions of high-density materials and supreme aesthetics.",
+      "image": "/uploads/img_1782588111960_719_WhatsApp_Image_2026-06-26_at_10.07.17_PM__1_.jpeg",
+      "linkCategory": "all"
+    }
+  ],
+  "orders": [],
+  "inquiries": [],
+  "customLogo": "",
+  "layout": {
+    "showSlider": true,
+    "showCategories": true,
+    "showFlashSale": true,
+    "showTrending": true,
+    "showReviews": true,
+    "showInquiry": true,
+    "showFooter": true
+  }
+}

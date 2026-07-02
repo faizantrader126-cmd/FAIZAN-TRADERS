@@ -1,4 +1,4 @@
-export const LIVE_SERVER_URL = "https://ais-pre-gjrx2a6tugveeqc7qhlfxe-411638771549.asia-east1.run.app";
+export const LIVE_SERVER_URL = "https://ais-pre-q7yfj2wvwrtivgsf574xcq-411638771549.asia-east1.run.app";
 
 /**
  * Returns a fully qualified API URL when running outside the server's environment (like on Vercel),
@@ -14,7 +14,7 @@ export function getApiUrl(path: string): string {
   // If we are in the primary AI Studio live preview container, use relative routing
   const isLocalContainer = 
     (hostname.includes("run.app") && !hostname.includes("vercel.app")) ||
-    hostname.includes("gjrx2a6tugveeqc7qhlfxe") ||
+    hostname === "3000-q7yfj2wvwrtivgsf.ais-pre-q7yfj2wvwrtivgsf.run.app" ||
     hostname === "localhost" && window.location.port === "3000";
 
   if (isLocalContainer) {
